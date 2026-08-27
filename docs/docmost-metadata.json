@@ -1,0 +1,142 @@
+{
+  "exportedAt": "2026-08-27T17:07:11.106Z",
+  "source": "docmost",
+  "version": "0.95.0",
+  "pages": {
+    "WorkingDocs%20%E2%80%94%20Posicionamiento%20vs%20Wiki%20T%C3%A9cnica.md": {
+      "pageId": "01a0269f-6b7c-7985-9a34-02add2941d68",
+      "slugId": "CduZFpr1ic",
+      "icon": null,
+      "position": "a57HF",
+      "parentPath": null,
+      "createdAt": "2026-08-21T23:19:37.084Z",
+      "updatedAt": "2026-08-21T23:19:37.156Z"
+    },
+    "WorkingDocs%20%E2%80%94%20Sesi%C3%B3n%20de%20Documentaci%C3%B3n%20Activa.md": {
+      "pageId": "01a02780-5fd2-7948-ae9c-ff549c48e970",
+      "slugId": "rS6eyPsV9w",
+      "icon": null,
+      "position": "aC5gS",
+      "parentPath": null,
+      "createdAt": "2026-08-22T03:25:19.695Z",
+      "updatedAt": "2026-08-22T03:25:20.177Z"
+    },
+    "WorkingDocs%20%E2%80%94%20PRD%20(Product%20Requirements%20Document).md": {
+      "pageId": "01a0269f-68c6-70b0-950a-f3c6c98a8adc",
+      "slugId": "fGL8xEJnd3",
+      "icon": null,
+      "position": "a12f6",
+      "parentPath": null,
+      "createdAt": "2026-08-21T23:19:36.389Z",
+      "updatedAt": "2026-08-21T23:19:36.451Z"
+    },
+    "WorkingDocs%20%E2%80%94%20PRD%20v2%20(Dashboard%20%2B%20Exportaciones).md": {
+      "pageId": "01a0269f-6a01-76b4-add2-023e9a8e3eed",
+      "slugId": "oqoL7TlMWo",
+      "icon": null,
+      "position": "a324W",
+      "parentPath": null,
+      "createdAt": "2026-08-21T23:19:36.705Z",
+      "updatedAt": "2026-08-21T23:19:36.830Z"
+    },
+    "WorkingDocs%20%E2%80%94%20PVD%20(Product%20Vision%20Document).md": {
+      "pageId": "01a0269f-6810-7cb0-87de-e324aa0c05fa",
+      "slugId": "7ssPSLTTRc",
+      "icon": null,
+      "position": "a078T",
+      "parentPath": null,
+      "createdAt": "2026-08-21T23:19:36.208Z",
+      "updatedAt": "2026-08-21T23:19:36.301Z"
+    },
+    "WorkingDocs%20%E2%80%94%20Integraci%C3%B3n%20MCP%20con%20Claude%20Code.md": {
+      "pageId": "01a0269f-6959-7117-8354-3eb585ad87cd",
+      "slugId": "jGioVRuNx5",
+      "icon": null,
+      "position": "a21hC",
+      "parentPath": null,
+      "createdAt": "2026-08-21T23:19:36.536Z",
+      "updatedAt": "2026-08-21T23:19:36.614Z"
+    },
+    "WorkingDocs%20%E2%80%94%20PRD%20Web%20App%20(fuente%20de%20verdad).md": {
+      "pageId": "01a0269f-6adb-7575-a2bd-bedd5782b6c5",
+      "slugId": "Ddex5wHjh6",
+      "icon": null,
+      "position": "a48Yy",
+      "parentPath": null,
+      "createdAt": "2026-08-21T23:19:36.921Z",
+      "updatedAt": "2026-08-21T23:19:36.997Z"
+    },
+    "WorkingDocs%20%E2%80%94%20PRD%20Docs%20Agent%20(agente%20local).md": {
+      "pageId": "01a0269f-6ca3-7ab4-b23a-dbf761ea3fd6",
+      "slugId": "5nxACZ5RsE",
+      "icon": null,
+      "position": "a67Gh",
+      "parentPath": null,
+      "createdAt": "2026-08-21T23:19:37.379Z",
+      "updatedAt": "2026-08-21T23:19:37.457Z"
+    },
+    "WorkingDocs%20%E2%80%94%20Comparativa%20LlamaIndex%2C%20OpenWiki%20y%20WorkingDocs.md": {
+      "pageId": "01a0269f-6d44-7a7f-8f7c-ef819181f2b9",
+      "slugId": "S7lONigLwW",
+      "icon": null,
+      "position": "a7BS6",
+      "parentPath": null,
+      "createdAt": "2026-08-21T23:19:37.540Z",
+      "updatedAt": "2026-08-21T23:19:37.606Z"
+    },
+    "WorkingDocs%20%E2%80%94%20Caso%20de%20Uso%20Auditor%C3%ADa%20de%20Repos%20%2B%20Resumen.md": {
+      "pageId": "01a0269f-6de6-7502-9f96-59c71f6cf325",
+      "slugId": "38VvAYNCQX",
+      "icon": null,
+      "position": "a86jR",
+      "parentPath": null,
+      "createdAt": "2026-08-21T23:19:37.701Z",
+      "updatedAt": "2026-08-21T23:19:37.761Z"
+    },
+    "WorkingDocs%20%E2%80%94%20Stack%20Tecnol%C3%B3gico%20y%20Arquitectura%20Monorepo.md": {
+      "pageId": "01a026b0-4172-7191-872d-b025396f300d",
+      "slugId": "V7ENrsmTtt",
+      "icon": null,
+      "position": "aA5YE",
+      "parentPath": null,
+      "createdAt": "2026-08-21T23:38:00.433Z",
+      "updatedAt": "2026-08-21T23:38:00.950Z"
+    },
+    "PRD%20%E2%80%94%20Agente%20de%20Documentaci%C3%B3n%20T%C3%A9cnica%20(MVP).md": {
+      "pageId": "01a026b6-987f-76bc-af4a-af5826f3161f",
+      "slugId": "1vBwmE8x1N",
+      "icon": null,
+      "position": "aBAtt",
+      "parentPath": null,
+      "createdAt": "2026-08-21T23:44:55.934Z",
+      "updatedAt": "2026-08-21T23:44:56.028Z"
+    },
+    "WorkingDocs%20%E2%80%94%20MVP%20Microservicio%20REST%20(GitHub%20%E2%86%92%20Markdown).md": {
+      "pageId": "01a026a0-0224-7d33-8fb7-6ca6b1c0b290",
+      "slugId": "5PRiVFUvLf",
+      "icon": null,
+      "position": "a94f8",
+      "parentPath": null,
+      "createdAt": "2026-08-21T23:20:15.651Z",
+      "updatedAt": "2026-08-21T23:41:41.727Z"
+    },
+    "WorkingDocs%20%E2%80%94%20Referencia%20claude-blog%20(AgriciDaniel).md": {
+      "pageId": "01a03959-9912-77e3-acf7-277badd1fb77",
+      "slugId": "djVS9tRZCN",
+      "icon": null,
+      "position": "aD3Wm",
+      "parentPath": null,
+      "createdAt": "2026-08-25T14:36:08.335Z",
+      "updatedAt": "2026-08-25T14:36:08.508Z"
+    },
+    "WorkingDocs%20%E2%80%94%20Taxonom%C3%ADa%20de%20Skills%20(referencia%20claude-blog).md": {
+      "pageId": "01a0395d-201d-7560-b4b6-e1d8966e485a",
+      "slugId": "5xGpCcgdrQ",
+      "icon": null,
+      "position": "aE5pU",
+      "parentPath": null,
+      "createdAt": "2026-08-25T14:39:59.516Z",
+      "updatedAt": "2026-08-25T14:39:59.879Z"
+    }
+  }
+}
