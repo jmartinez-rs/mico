@@ -23,3 +23,8 @@ npm-debug.log*
 
 # Test / coverage
 coverage/
+
+# Mico generated output & agent scratch
+docs/mico/
+.agents/
+

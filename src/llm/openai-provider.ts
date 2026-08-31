@@ -48,3 +48,5 @@ export class OpenAICompatibleProvider implements LLMProvider {
     }
   }
 }
+
+export { OpenAICompatibleProvider as OpenAIProvider };

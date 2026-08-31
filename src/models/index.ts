@@ -37,6 +37,8 @@ export interface PullRequestData {
   reviews: PullRequestReview[];
 }
 
+import type { Confidence } from "../domain/work-event.js";
+
 export interface GeneratedDocument {
   id: string;
   repository: string;
@@ -44,6 +46,20 @@ export interface GeneratedDocument {
   title: string;
   filePath: string;
   createdAt: string;
+  confidence?: Confidence;
+  needsHumanReview?: boolean;
+}
+
+/**
+ * Resultado de subir el Markdown generado al repositorio (opcional). Se agrega a
+ * la respuesta de los endpoints solo cuando la subida estuvo activa.
+ */
+export interface RepoUploadResult {
+  committed: boolean;
+  path: string;
+  url?: string;
+  /** Motivo del fallo cuando la subida no se concretó (best-effort). */
+  error?: string;
 }
 
 export interface DocumentGenerationResult {
@@ -51,4 +67,7 @@ export interface DocumentGenerationResult {
   id: string;
   filePath: string;
   documentUrl: string | null;
+  confidence: Confidence;
+  needsHumanReview: boolean;
+  repoUpload?: RepoUploadResult;
 }

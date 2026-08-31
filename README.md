@@ -1,127 +1,108 @@
-# WorkingDocs — MVP
+# Mico 🐒 — Agente de Monitoreo de Commits
 
-Microservicio REST ligero, en TypeScript sobre Node.js, que genera documentación Markdown **trazable** a partir de Pull Requests de GitHub usando un LLM.
+**Mico** es un agente autónomo de desarrollo en Node.js y TypeScript empaquetado para ejecutarse fácilmente mediante `npx` o `npm`. Su nombre nace en alusión a los monos pequeños que son curiosos y siempre están viendo lo que haces.
 
-Es la Fase 1 del producto WorkingDocs (ver `docs/`): convertir el trabajo real (PRs, commits, diffs) en documentación viva.
+Mico se ejecuta en segundo plano escuchando y analizando todo el tiempo los commits de tu repositorio Git. Cuando detecta un commit nuevo, analiza los cambios mediante IA (usando cualquier proveedor compatible con OpenAI) y genera o actualiza un informe diario en formato Markdown dentro de la carpeta `/docs/mico` (`YYYY-MM-DD.md`).
 
-## Arquitectura
+---
 
-```
-Cliente REST
-    ↓
-API Fastify + TypeScript
-    ↓
-GitHub API (Octokit)
-    ↓
-Proveedor LLM (compatible OpenAI)
-    ↓
-Generador Markdown
-    ↓
-Carpeta /data/docs
-```
+## 📦 Instalación y Uso Rápido en Cualquier Repositorio
 
-El proveedor LLM es **compatible con la API de OpenAI**: basta con configurar `LLM_BASE_URL`, `LLM_API_KEY` y `LLM_MODEL`, por lo que funciona con Opencode, OpenAI o cualquier endpoint compatible.
+No necesitas clonar este repositorio para usar Mico en tus proyectos. Podés ejecutarlo directamente con `npx` en la raíz de cualquier repositorio Git:
 
-## Requisitos
-
-- Node.js >= 20
-- Un token de GitHub (`GITHUB_TOKEN`)
-- API key de un proveedor LLM compatible con OpenAI
-
-## Configuración
-
-Copiá `.env.example` a `.env` y completá los valores:
+### 1. Inicializar Mico en tu proyecto
+Ejecutá el comando de inicialización en la raíz de tu proyecto:
 
 ```bash
-cp .env.example .env
+npx mico init
 ```
 
-| Variable | Descripción | Default |
-| --- | --- | --- |
-| `PORT` | Puerto HTTP | `3000` |
-| `GITHUB_TOKEN` | Token de acceso a GitHub | — (obligatorio) |
-| `LLM_BASE_URL` | Base URL del endpoint compatible con OpenAI | `https://api.openai.com/v1` |
-| `LLM_API_KEY` | API key del proveedor LLM | — (obligatorio) |
-| `LLM_MODEL` | Modelo a utilizar | `gpt-4o-mini` |
-| `DOCUMENTS_PATH` | Carpeta donde se guardan los documentos | `./data/docs` |
+Este comando creará automáticamente:
+- El archivo de configuración **`mico.config.json`**.
+- La carpeta **`/docs/mico`** donde se guardarán los informes diarios.
 
-> Las API keys **nunca** se envían desde el frontend ni se almacenan en los documentos.
+---
 
-## Uso
+### 2. Configurar tus variables
 
-```bash
-npm install
-npm run dev      # desarrollo con recarga
-npm run build    # compila a dist/
-npm start        # ejecuta la build
-npm test         # corre los tests
-```
-
-## Endpoints
-
-```
-GET  /health
-POST /v1/documents/from-pull-request
-GET  /v1/documents
-GET  /v1/documents/:id
-```
-
-### Generar documentación desde un PR
-
-```bash
-curl -X POST http://localhost:3000/v1/documents/from-pull-request \
-  -H "Content-Type: application/json" \
-  -d '{ "repository": "owner/repo", "pullRequestNumber": 123 }'
-```
-
-Respuesta:
+Abre el archivo `mico.config.json` generado e ingresá tu API Key del proveedor LLM:
 
 ```json
 {
-  "status": "completed",
-  "id": "…",
-  "filePath": "data/docs/pull-requests/123-feature-login.md",
-  "documentUrl": null
+  "llmApiKey": "TU_API_KEY_AQUI",
+  "llmBaseUrl": "https://api.openai.com/v1",
+  "llmModel": "gpt-4o-mini",
+  "watchIntervalMs": 10000,
+  "outputDir": "./docs/mico"
 }
 ```
 
-## Estructura del proyecto
+*(También podés usar un archivo `.env` o variables de entorno tradicionales si lo preferís)*.
 
-```
-src/
-├── index.ts              # Entry point
-├── server.ts             # Construcción del servidor Fastify + wiring
-├── config.ts             # Carga y validación de env (Zod)
-├── routes/
-│   ├── health.ts
-│   └── documents.ts
-├── github/
-│   └── github-client.ts  # Lectura de PRs con Octokit
-├── llm/
-│   ├── provider.ts       # Abstracción LLMProvider
-│   ├── openai-provider.ts# Provider compatible con OpenAI
-│   └── prompt.ts         # Construcción del prompt
-├── documents/
-│   ├── document-service.ts
-│   ├── markdown-writer.ts
-│   └── document-store.ts # Índice persistente (JSON)
-└── models/
-    └── index.ts          # Tipos compartidos
-```
+---
 
-## Docker
+### 3. Iniciar la escucha del agente
+
+Inicia Mico en segundo plano:
 
 ```bash
-docker build -t workingdocs .
-docker run --rm -p 3000:3000 --env-file .env workingdocs
+npx mico start
 ```
 
-## Roadmap
+O si preferís instalarlo globalmente:
 
-Según los PRD en `docs/`:
+```bash
+npm install -g mico
+mico start
+```
 
-- **Fase 1 (este MVP):** generación de docs desde PRs
-- **Fase 2:** sesiones de documentación activa (polling de commits/PRs por rama)
-- **Fase 3:** web app (dashboard, editor, búsqueda, versionado)
-- **Fase 4:** integraciones (Jira, Confluence) y MCP para Claude Code / Cursor
+---
+
+## ⚙️ Opciones de Configuración (`mico.config.json` o `.env`)
+
+Mico lee la configuración con la siguiente prioridad: **Variables de Entorno > `mico.config.json` > Valores por defecto**.
+
+| Campo en `mico.config.json` | Variable de Entorno | Descripción | Default |
+| --- | --- | --- | --- |
+| `llmApiKey` | `LLM_API_KEY` | API Key de tu proveedor LLM | *(Obligatorio)* |
+| `llmBaseUrl` | `LLM_BASE_URL` | Base URL compatible con OpenAI | `https://api.openai.com/v1` |
+| `llmModel` | `LLM_MODEL` | Modelo LLM a utilizar | `gpt-4o-mini` |
+| `watchIntervalMs` | `MICO_WATCH_INTERVAL_MS` | Intervalo de chequeo de commits en ms | `10000` (10s) |
+| `targetRepoPath` | `MICO_TARGET_REPO_PATH` | Ruta del repositorio Git | `./` |
+| `outputDir` | `MICO_OUTPUT_DIR` | Carpeta de salida para Markdown | `./docs/mico` |
+| `stateFile` | `MICO_STATE_FILE` | Archivo JSON de estado de commits | `./data/mico-state.json` |
+
+---
+
+## 📂 Estructura del Informe Diario (`/docs/mico/YYYY-MM-DD.md`)
+
+Cada día, Mico crea o actualiza el archivo correspondiente en `/docs/mico/`:
+
+```markdown
+# Informe de Desarrollo - 2026-08-31 🐒
+
+> Documento generado por **Mico**, el agente observador de desarrollo.
+
+## 📌 Visión General del Día
+Este informe documenta las tareas y cambios realizados durante el día **2026-08-31**.
+
+## 📜 Registro de Commits e Implementaciones
+
+---
+
+### 🔨 Commit `a1b2c3d` — feat: agregar autenticación de usuarios
+
+- **Hora:** `14:30:15`
+- **Autor:** Jose
+- **Hash:** `a1b2c3d4e5f6...`
+
+#### 1. Resumen Ejecutivo
+Se implementó el servicio de autenticación y gestión de sesiones.
+
+#### 2. Cambios Realizados
+- Adición de middleware de verificación de tokens
+- Creación de rutas de login y logout
+
+#### 3. Impacto
+Módulo de seguridad y endpoints de API protegidos.
 ```

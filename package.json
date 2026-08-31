@@ -1,18 +1,28 @@
 {
-  "name": "workingdocs",
+  "name": "mico",
   "version": "0.1.0",
-  "description": "Microservicio REST que genera documentación Markdown trazable a partir de Pull Requests de GitHub usando un LLM.",
+  "description": "Mico 🐒 - Agente curioso que monitorea commits de Git en tiempo real y documenta las tareas diarias en Markdown.",
   "type": "module",
+  "license": "MIT",
+  "bin": {
+    "mico": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "engines": {
     "node": ">=20"
   },
   "scripts": {
-    "dev": "tsx watch src/index.ts",
-    "build": "tsc -p tsconfig.json",
-    "start": "node dist/index.js",
-    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "dev": "tsx watch src/cli.ts start",
+    "build": "node node_modules/typescript/bin/tsc -p tsconfig.json && chmod +x dist/cli.js",
+    "start": "node dist/cli.js start",
+    "typecheck": "node node_modules/typescript/bin/tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "calibrate": "tsx src/calibration/run.ts"
   },
   "dependencies": {
     "@octokit/rest": "^22.0.0",
@@ -23,8 +33,8 @@
   },
   "devDependencies": {
     "@types/node": "^24.0.0",
-    "tsx": "^4.19.0",
-    "typescript": "^5.6.0",
-    "vitest": "^3.0.0"
+    "tsx": "^4.23.13",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.7"
   }
 }

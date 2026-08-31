@@ -3,6 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import type { AppConfig } from "../config.js";
+import { DEFAULT_CONFIDENCE_CONFIG } from "../domain/confidence.js";
 import type { GitHubClient } from "../github/github-client.js";
 import type { LLMProvider } from "../llm/provider.js";
 import type { PullRequestData } from "../models/index.js";
@@ -52,6 +53,15 @@ function makeConfig(): AppConfig {
     githubToken: "token",
     llm: { baseUrl: "https://x/v1", apiKey: "key", model: "m" },
     documentsPath,
+    workEventsPath: join(documentsPath, "work-events"),
+    mico: {
+      watchIntervalMs: 10000,
+      targetRepoPath: "./",
+      outputDir: "./docs/mico",
+      stateFile: "./data/mico-state.json",
+    },
+    publish: { toRepo: false, pathPrefix: "docs/mico" },
+    confidence: DEFAULT_CONFIDENCE_CONFIG,
   };
 }
 
@@ -84,10 +94,13 @@ describe("documents routes", () => {
     const body = create.json();
     expect(body.status).toBe("completed");
     expect(body.filePath).toContain("42-feature-cache.md");
+    expect(body.confidence).toMatchObject({ level: expect.any(String) });
+    expect(typeof body.needsHumanReview).toBe("boolean");
 
     const written = await readFile(body.filePath, "utf8");
     expect(written).toContain("# Add caching");
     expect(written).toContain("Se agregó una capa de caché.");
+    expect(written).toContain("## Confianza");
 
     const list = await app.inject({ method: "GET", url: "/v1/documents" });
     expect(list.json().documents).toHaveLength(1);

@@ -1,19 +1,25 @@
 import { loadConfig } from "./config.js";
-import { buildServer } from "./server.js";
+import { MicoAgent } from "./agent/agent.js";
 
 async function main(): Promise<void> {
   const config = loadConfig();
-  const app = await buildServer(config);
+  const agent = new MicoAgent(config);
 
-  try {
-    await app.listen({ port: config.port, host: "0.0.0.0" });
-  } catch (error) {
-    app.log.error(error);
-    process.exit(1);
-  }
+  // Manejo de apagar agente limpiamente con señales del OS
+  const shutdown = () => {
+    console.log("\n[Mico 🐒] Recibida señal de apagado. Deteniendo...");
+    agent.stop();
+    process.exit(0);
+  };
+
+  process.on("SIGINT", shutdown);
+  process.on("SIGTERM", shutdown);
+
+  await agent.start();
 }
 
 main().catch((error) => {
-  console.error(error instanceof Error ? error.message : error);
+  console.error("[Mico 🐒] Error fatal:", error instanceof Error ? error.message : error);
   process.exit(1);
 });
+

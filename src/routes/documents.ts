@@ -9,6 +9,7 @@ const fromPullRequestSchema = z.object({
     .string()
     .regex(/^[^/\s]+\/[^/\s]+$/, 'Se espera el formato "owner/repo"'),
   pullRequestNumber: z.coerce.number().int().positive(),
+  uploadToRepo: z.boolean().optional(),
 });
 
 const documentParamsSchema = z.object({
@@ -32,7 +33,16 @@ export async function registerDocumentRoutes(
       const result = await service.generateFromPullRequest({
         repository: parsed.data.repository,
         pullRequestNumber: parsed.data.pullRequestNumber,
+        uploadToRepo: parsed.data.uploadToRepo,
       });
+      // Subida best-effort: si falló no rompe el request; se loguea y se
+      // responde 201 con `repoUpload.committed=false`.
+      if (result.repoUpload?.committed === false && result.repoUpload.error) {
+        request.log.error(
+          { path: result.repoUpload.path, err: result.repoUpload.error },
+          "Falló la subida del documento al repo (best-effort)",
+        );
+      }
       return reply.status(201).send(result);
     } catch (error: unknown) {
       if (error instanceof GitHubError) {
