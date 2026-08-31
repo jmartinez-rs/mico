@@ -98,7 +98,7 @@ export function detectDrift(events: StoredWorkEvent[]): DriftSignal[] {
         reason.includes("no tiene descripción"),
       )
     ) {
-      signals.push({ ...base, reason: "PR sin descripción." });
+      signals.push({ ...base, reason: "Sin descripción." });
     }
 
     const hasCommitEvidence = stored.evidence.some(

@@ -16,9 +16,12 @@ Sos un asistente de ingeniería que continúa el desarrollo de **Mico 🐒**, un
 
 ## Estado del Código (100% verificado)
 
-- **Loop principal:** `src/agent/agent.ts` y `src/index.ts`.
-- **Git Watcher:** `src/git/git-watcher.ts` para lectura de commits, diffs y metadatos.
+- **CLI:** `src/cli.ts` (comandos `init`, `start` — daemon, `serve` — servidor REST).
+- **Loop principal (daemon):** `src/agent/agent.ts` — monitorea commits locales, escribe informes diarios y persiste WorkEvents en la memoria compartida.
+- **Git Watcher:** `src/git/git-watcher.ts` para lectura de commits, diffs, metadatos y remote URL.
 - **Persistencia de Estado:** `src/memory/agent-state-store.ts` (`./data/mico-state.json`).
+- **Memoria de eventos de trabajo:** `src/memory/work-event-store.ts` (compartida entre daemon y servidor).
 - **Análisis LLM:** `src/llm/commit-analyzer.ts` y `src/llm/commit-analyzer-prompt.ts`.
 - **Informes Diarios:** `src/documents/daily-doc-manager.ts`.
-- **Tests Unitarios:** 55/55 tests en verde.
+- **Servidor REST:** `src/server.ts` (Fastify) — documentos desde PRs, work-events, digests semanales.
+- **Tests Unitarios:** 72/72 tests en verde.

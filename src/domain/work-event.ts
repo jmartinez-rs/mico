@@ -7,7 +7,7 @@
  * Estos tipos son dominio puro: sin dependencias de I/O, red ni framework.
  */
 
-export type WorkEventType = "pull_request";
+export type WorkEventType = "pull_request" | "commit";
 
 export type EvidenceKind = "pull_request" | "commit" | "review";
 

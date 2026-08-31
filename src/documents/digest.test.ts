@@ -141,7 +141,7 @@ describe("detectDrift", () => {
     });
     const signals = detectDrift([noCommits]);
     const reasons = signals.map((s) => s.reason);
-    expect(reasons).toContain("PR sin descripción.");
+    expect(reasons).toContain("Sin descripción.");
     expect(reasons.some((r) => r.includes("No hay commits"))).toBe(true);
   });
 });

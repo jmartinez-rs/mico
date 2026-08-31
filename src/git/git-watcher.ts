@@ -108,6 +108,19 @@ export class GitWatcher {
   }
 
   /**
+   * Obtiene la URL del remote `origin` (si existe) para derivar el
+   * `repository` (`owner/repo`) de los WorkEvents locales.
+   */
+  async getRemoteUrl(): Promise<string | null> {
+    try {
+      const output = await this.runGit(["config", "--get", "remote.origin.url"]);
+      return output || null;
+    } catch {
+      return null;
+    }
+  }
+
+  /**
    * Obtiene todos los commits no procesados en orden cronológico (más antiguo primero).
    */
   async getUnprocessedCommits(
@@ -131,4 +144,43 @@ export class GitWatcher {
     }
     return result;
   }
+}
+
+/**
+ * Normaliza una URL de remote git a `owner/repo` (sin host, esquema ni `.git`).
+ * Soporta SSH (`git@github.com:owner/repo.git`) y HTTPS
+ * (`https://github.com/owner/repo.git`). Para repos con subgrupos
+ * (`group/sub/project`) se conservan los últimos dos segmentos. Si no reconoce
+ * el formato, devuelve la URL limpia de `.git` tal cual.
+ */
+export function normalizeRemoteUrl(url: string): string {
+  const trimmed = url.trim();
+  const sshMatch = trimmed.match(/^[^@\s]+@([^:]+):(.+?)(?:\.git)?$/);
+  if (sshMatch) {
+    return lastTwoSegments(sshMatch[2] ?? "");
+  }
+  const httpsMatch = trimmed.match(/^https?:\/\/([^/]+)\/(.+?)(?:\.git)?$/);
+  if (httpsMatch) {
+    return lastTwoSegments(httpsMatch[2] ?? "");
+  }
+  return trimmed.replace(/\.git$/, "");
+}
+
+/** Host del remote (`github.com`, `gitlab.com`, ...) o `null` si no se reconoce. */
+export function remoteHost(url: string): string | null {
+  const trimmed = url.trim();
+  const sshMatch = trimmed.match(/^[^@\s]+@([^:]+):/);
+  if (sshMatch) {
+    return sshMatch[1] ?? null;
+  }
+  const httpsMatch = trimmed.match(/^https?:\/\/([^/]+)\//);
+  if (httpsMatch) {
+    return httpsMatch[1] ?? null;
+  }
+  return null;
+}
+
+function lastTwoSegments(path: string): string {
+  const parts = path.split("/").filter(Boolean);
+  return parts.slice(-2).join("/");
 }

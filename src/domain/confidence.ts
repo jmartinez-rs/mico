@@ -94,6 +94,60 @@ function isPoorCommitMessage(message: string): boolean {
 }
 
 /**
+ * Heurística de confianza para un commit local (daemon). Es el análogo de
+ * `computeConfidence` para la señal de un commit: penaliza mensaje genérico,
+ * descripción ausente/breve, sin archivos y sin diff. Reutiliza los mismos
+ * pesos y umbrales configurables.
+ */
+export function computeCommitConfidence(
+  commit: { message: string; filesChanged: string[]; diff: string },
+  config: ConfidenceConfig = DEFAULT_CONFIDENCE_CONFIG,
+): Confidence {
+  let score = 1;
+  const reasons: string[] = [];
+  const { weights } = config;
+
+  const lines = commit.message.split("\n");
+  const firstLine = lines[0] ?? "";
+  const body = lines.slice(1).join("\n").trim();
+
+  if (body.length === 0) {
+    score -= weights.noBody;
+    reasons.push("El commit no tiene descripción.");
+  } else if (body.length < config.minBodyLength) {
+    score -= weights.shortBody;
+    reasons.push("La descripción del commit es muy breve.");
+  }
+
+  if (isPoorCommitMessage(firstLine)) {
+    score -= weights.poorCommits;
+    reasons.push("El mensaje del commit es poco descriptivo.");
+  }
+
+  if (commit.filesChanged.length === 0) {
+    score -= weights.noFiles;
+    reasons.push("El commit no modifica archivos.");
+  }
+
+  if ((commit.diff ?? "").trim().length === 0) {
+    score -= weights.noDiff;
+    reasons.push("No hay contexto de diff en el commit.");
+  }
+
+  score = Math.max(0, Math.min(1, score));
+
+  if (reasons.length === 0) {
+    reasons.push("Señal fuerte: mensaje descriptivo y diff presente.");
+  }
+
+  return {
+    score: Number(score.toFixed(2)),
+    level: classifyLevel(score, config),
+    reasons,
+  };
+}
+
+/**
  * Calcula la confianza de forma heurística y determinista a partir de la fuerza
  * de la señal del PR (descripción, calidad de commits, presencia de diff). No
  * usa el LLM. Parte de 1.0 y penaliza, acumulando motivos legibles. Los pesos y
