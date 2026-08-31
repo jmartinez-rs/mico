@@ -1,45 +1,95 @@
-# Mico 🐒 — Agente Curioso de Monitoreo de Commits y Documentación Viva
+<div align="center">
 
-**Mico** es un agente autónomo de desarrollo en Node.js y TypeScript empaquetado para ejecutarse fácilmente mediante `npx` o `npm`. Su nombre nace en alusión a los monos pequeños que son curiosos, ágiles y siempre están observando detenidamente lo que hacés en tu repositorio.
+<img src="public/img/mico-logo.png" alt="Logo de Mico: mono kawaii con cuaderno y lápiz sobre fondo azul" width="140" />
 
-Mico tiene **dos modos de operación**:
+# Mico 🐒
 
-1. **Daemon (`mico start`)** — corre en segundo plano, escucha los commits de tu repositorio Git local, los analiza con IA (cualquier proveedor compatible con OpenAI) y genera informes diarios en `docs/mico/YYYY-MM-DD.md`. Además persiste cada commit como *evento de trabajo* en su memoria local, de modo que los resúmenes semanales funcionan sin depender de GitHub.
-2. **Servidor REST (`mico serve`)** — expone endpoints HTTP (Fastify) para generar documentación desde Pull Requests de GitHub, consultar la memoria de eventos de trabajo y producir resúmenes semanales (digests).
+### Tu agente de desarrollo que convierte commits en documentación viva.
 
----
+**Mico observa lo que construís, entiende los cambios con IA y transforma tu actividad de desarrollo en evidencia, documentación y memoria de proyecto.**
 
-## ⚡ Características Principales
+[![Node.js](https://img.shields.io/badge/Node.js-20%2B-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Fastify](https://img.shields.io/badge/Fastify-REST-000000?logo=fastify&logoColor=white)](https://fastify.dev/)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-- 🐒 **Monitoreo Continuo (Daemon):** Escucha activa de commits en tiempo real sin interrumpir tu flujo de trabajo.
-- 🤖 **Análisis con LLM:** Soporta cualquier proveedor compatible con la API de OpenAI (OpenAI, Ollama, OpenRouter, Groq, LM Studio, etc.).
-- 📅 **Informes Diarios Automáticos:** Registra avances y resúmenes diarios organizados por fecha (`docs/mico/YYYY-MM-DD.md`).
-- 🧠 **Memoria de Eventos de Trabajo:** Cada commit (daemon) o PR (servidor) se persiste como `WorkEvent` con evidencia, afirmaciones (`claims`) y un **score de confianza**.
-- 🚦 **Gate de Confianza:** La confianza se calcula con heurísticas deterministas y configurables; por debajo del umbral, el resultado se marca para **revisión humana**.
-- 📊 **Digests Semanales:** Agregan la memoria de la semana en un Markdown con avances, decisiones, pendientes y señales de drift.
-- 🌐 **Servidor REST Integrado:** Endpoints Fastify para consulta de documentos, eventos de trabajo, digests y generación desde PRs de GitHub.
-- 📤 **Publicación al Repo (opt-in):** Sube el Markdown generado al repositorio de GitHub como artefacto/evidencia.
-- 🛠️ **Cero Configuración Compleja:** Inicialización instantánea con `npx mico init`.
+</div>
 
 ---
 
-## 📦 Instalación y Uso Rápido
+## 💡 ¿Qué es Mico?
 
-No necesitas clonar este repositorio para usar Mico en tu proyecto. Podés ejecutarlo directamente en la raíz de cualquier repositorio Git:
+Mico es un agente autónomo de desarrollo escrito en **Node.js + TypeScript** que observa la actividad de un repositorio Git y construye una **memoria estructurada de lo que realmente ocurrió en el proyecto**.
 
-### 1. Inicializar Mico en tu proyecto
+En lugar de obligarte a escribir documentación manualmente, Mico toma la evidencia disponible —commits, mensajes, archivos y diffs— y utiliza un LLM para convertirla en información útil:
+
+```text
+                 ┌──────────────────────┐
+                 │   Tu repositorio Git │
+                 └──────────┬───────────┘
+                            │
+                         commits
+                            │
+                            ▼
+                    ┌───────────────┐
+                    │   🐒 Mico     │
+                    │               │
+                    │ Git + LLM +   │
+                    │ memoria local │
+                    └───────┬───────┘
+                            │
+              ┌─────────────┼──────────────┐
+              ▼             ▼              ▼
+        📄 Docs diarias   🧠 Memoria    📊 Digests
+                         WorkEvents     semanales
+```
+
+### Mico tiene dos formas de trabajar
+
+**`mico start` — Daemon**
+
+Mico comprueba periódicamente tu repositorio local, detecta nuevos commits, los analiza con IA y actualiza un informe diario en:
+
+```text
+docs/mico/YYYY-MM-DD.md
+```
+
+Además, cada commit procesado queda guardado como un `WorkEvent`. Eso permite construir resúmenes semanales a partir de la memoria local, sin depender de volver a consultar GitHub.
+
+**`mico serve` — REST API**
+
+Levanta un servidor Fastify para:
+
+- generar documentación desde Pull Requests de GitHub;
+- consultar documentos generados;
+- consultar la memoria de eventos;
+- generar digests semanales;
+- publicar documentación en GitHub de forma opcional.
+
+---
+
+# ⚡ Probalo en menos de 2 minutos
+
+Mico está pensado para que puedas probarlo directamente sobre un repositorio existente.
+
+### 1. Inicializá Mico
+
+Desde la raíz de tu proyecto:
 
 ```bash
 npx mico init
 ```
 
-Este comando crea automáticamente:
-- El archivo de configuración **`mico.config.json`** (con todos los campos: LLM, persistencia, publish, confianza).
-- La carpeta **`docs/mico`** donde se guardarán los informes diarios.
+Esto crea:
 
-### 2. Configurar las credenciales
+```text
+mico.config.json
+docs/mico/
+```
 
-Abrí `mico.config.json` y completá `llm.apiKey` (obligatorio). Si vas a usar el servidor REST con PRs de GitHub, completá también `githubToken`:
+### 2. Configurá tu proveedor LLM
+
+Editá `mico.config.json`:
 
 ```json
 {
@@ -47,7 +97,7 @@ Abrí `mico.config.json` y completá `llm.apiKey` (obligatorio). Si vas a usar e
   "githubToken": "",
   "llm": {
     "baseUrl": "https://api.openai.com/v1",
-    "apiKey": "TU_API_KEY_AQUI",
+    "apiKey": "TU_API_KEY",
     "model": "gpt-4o-mini"
   },
   "documentsPath": "./data/docs",
@@ -61,22 +111,123 @@ Abrí `mico.config.json` y completá `llm.apiKey` (obligatorio). Si vas a usar e
 }
 ```
 
-*(También podés usar un archivo `.env` o variables de entorno tradicionales si preferís)*.
+No estás limitado a OpenAI. Mico trabaja con cualquier proveedor que exponga una API compatible con OpenAI, por ejemplo:
 
-### 3. Iniciar la escucha del agente (daemon)
+- OpenAI
+- Ollama
+- OpenRouter
+- Groq
+- LM Studio
+- otros proveedores compatibles
+
+### 3. Dejá que Mico observe
 
 ```bash
 npx mico start
 ```
 
-O si preferís instalarlo de manera global:
+A partir de ahí, cada commit nuevo que Mico detecte puede convertirse en documentación y memoria de trabajo.
+
+---
+
+# ✨ ¿Qué hace exactamente?
+
+## 🐒 Observa tu actividad
+
+Mico monitoriza el repositorio local mediante polling configurable y detecta nuevos commits sin cambiar tu flujo de trabajo.
+
+## 🤖 Entiende los cambios
+
+No se limita a copiar el mensaje del commit. Utiliza un LLM para analizar la evidencia disponible y generar un resumen contextual.
+
+## 📅 Construye documentación diaria
+
+Cada día genera o actualiza:
+
+```text
+docs/mico/2026-08-31.md
+```
+
+Con información como:
+
+- resumen del día;
+- commits detectados;
+- cambios realizados;
+- impacto;
+- evidencia asociada.
+
+## 🧠 Mantiene memoria del trabajo
+
+Cada commit procesado por el daemon se persiste como un `WorkEvent`.
+
+Un evento puede contener:
+
+```text
+repository
+commit / PR
+timestamp
+evidence
+claims
+confidence
+needsHumanReview
+```
+
+Esto permite consultar posteriormente **qué se hizo, cuándo y con qué nivel de confianza**.
+
+## 📊 Genera digests semanales
+
+Mico puede agrupar los eventos de la semana y producir un resumen con:
+
+- avances;
+- decisiones;
+- pendientes;
+- señales de drift;
+- actividad relevante.
+
+La idea es simple: **tener una memoria del proyecto basada en evidencia, no en lo que alguien recuerda que ocurrió.**
+
+## 🚦 No todo se acepta ciegamente
+
+Mico incorpora un **Confidence Gate**.
+
+El score de confianza se calcula utilizando heurísticas deterministas basadas, entre otras cosas, en:
+
+- calidad de la descripción;
+- calidad de los mensajes de commit;
+- presencia de archivos;
+- información disponible en los diffs.
+
+Cuando el score queda por debajo de `reviewThreshold`, Mico marca el resultado:
+
+```json
+{
+  "needsHumanReview": true
+}
+```
+
+La IA ayuda a interpretar la evidencia; el gate intenta evitar que interpretaciones débiles se presenten como hechos.
+
+---
+
+# 🛠️ Instalación
+
+Podés utilizar Mico sin clonar este repositorio:
+
+```bash
+npx mico init
+npx mico start
+```
+
+O instalarlo globalmente:
 
 ```bash
 npm install -g mico
+
+mico init
 mico start
 ```
 
-### 4. Levantar el servidor REST
+Para ejecutar el servidor REST:
 
 ```bash
 npx mico serve
@@ -84,80 +235,54 @@ npx mico serve
 
 ---
 
-## ⚙️ Opciones de Configuración (`mico.config.json` o `.env`)
+# 🌐 API REST
 
-Mico resuelve las configuraciones siguiendo este orden de prioridad: **Variables de Entorno > `mico.config.json` > Valores por defecto**.
+Con:
 
-| Campo en `mico.config.json` | Variable de Entorno | Descripción | Default |
-| --- | --- | --- | --- |
-| `llm.apiKey` | `LLM_API_KEY` | API Key de tu proveedor LLM | *(Obligatorio)* |
-| `llm.baseUrl` | `LLM_BASE_URL` | Base URL compatible con OpenAI | `https://api.openai.com/v1` |
-| `llm.model` | `LLM_MODEL` | Modelo LLM a utilizar | `gpt-4o-mini` |
-| `githubToken` | `GITHUB_TOKEN` | Token de GitHub (PRs y publish al repo) | *(vacío)* |
-| `port` | `PORT` | Puerto del servidor REST | `3000` |
-| `mico.watchIntervalMs` | `MICO_WATCH_INTERVAL_MS` | Intervalo de chequeo de commits (ms) | `10000` |
-| `mico.targetRepoPath` | `MICO_TARGET_REPO_PATH` | Ruta local del repositorio Git | `./` |
-| `mico.outputDir` | `MICO_OUTPUT_DIR` | Carpeta de informes diarios del daemon | `./docs/mico` |
-| `mico.stateFile` | `MICO_STATE_FILE` | Estado de commits procesados | `./data/mico-state.json` |
-| `documentsPath` | `DOCUMENTS_PATH` | Documentos por PR y digests (servidor) | `./data/docs` |
-| `workEventsPath` | `WORK_EVENTS_PATH` | Memoria de eventos de trabajo | `./data/work-events` |
-| `publish.toRepo` | `PUBLISH_TO_REPO` | Subir Markdown al repo (opt-in) | `false` |
-| `publish.repo` | `PUBLISH_REPO` | Repo destino `owner/repo` (vacío ⇒ repo de origen) | *(vacío)* |
-| `publish.branch` | `PUBLISH_BRANCH` | Rama destino (vacío ⇒ default) | *(vacío)* |
-| `publish.pathPrefix` | `PUBLISH_PATH_PREFIX` | Prefijo de ruta en el repo | `docs/mico` |
-| `confidence.*` | `CONFIDENCE_*` | Umbrales y pesos del gate de confianza | *(ver calibración)* |
+```bash
+npx mico serve
+```
 
----
+Mico expone:
 
-## 🌐 Endpoints REST (Microservicio)
+| Método | Endpoint | Descripción |
+|---|---|---|
+| `GET` | `/health` | Estado del servicio |
+| `POST` | `/v1/documents/from-pull-request` | Genera documentación desde un PR |
+| `GET` | `/v1/documents` | Lista documentos generados |
+| `GET` | `/v1/documents/:id` | Obtiene un documento |
+| `GET` | `/v1/work-events` | Consulta la memoria de trabajo |
+| `GET` | `/v1/work-events/:id` | Obtiene un evento |
+| `POST` | `/v1/digests/weekly` | Genera o recupera un digest semanal |
 
-Cuando se ejecuta `mico serve`, Mico expone los siguientes endpoints:
-
-- `GET  /health` — Verificación de estado del servicio.
-- `POST /v1/documents/from-pull-request` — Genera documentación Markdown desde un PR de GitHub.
-- `GET  /v1/documents` — Lista los documentos generados.
-- `GET  /v1/documents/:id` — Obtiene un documento específico.
-- `GET  /v1/work-events` — Obtiene eventos de trabajo (memoria) con filtros opcionales `repository`, `from`, `to`.
-- `GET  /v1/work-events/:id` — Obtiene un evento de trabajo específico.
-- `POST /v1/digests/weekly` — Genera o recupera resúmenes semanales desde la memoria.
-
-### Ejemplo: Generar documentación desde un PR
+## Generar documentación desde un Pull Request
 
 ```bash
 curl -X POST http://localhost:3000/v1/documents/from-pull-request \
   -H "Content-Type: application/json" \
-  -d '{ "repository": "owner/repo", "pullRequestNumber": 123 }'
+  -d '{
+    "repository": "owner/repo",
+    "pullRequestNumber": 123
+  }'
 ```
 
-### Ejemplo: Digest semanal desde la memoria local
+## Generar un digest semanal
 
 ```bash
 curl -X POST http://localhost:3000/v1/digests/weekly \
   -H "Content-Type: application/json" \
-  -d '{ "repository": "owner/repo" }'
+  -d '{
+    "repository": "owner/repo"
+  }'
 ```
 
-> El digest lee la **memoria de eventos de trabajo** (`workEventsPath`). Si el daemon estuvo corriendo sobre tu repo, los commits locales ya están ahí y el digest funciona sin GitHub.
+> El digest utiliza `workEventsPath` como memoria. Esto permite resumir los eventos capturados por el daemon sin depender de consultar GitHub nuevamente.
 
 ---
 
-## 🚦 Gate de Confianza y Calibración
+# 📄 Un informe generado por Mico
 
-Cada evento (PR o commit) recibe un **score de confianza** (0..1) calculado con heurísticas deterministas: presencia/calidad de la descripción, calidad de los mensajes de commit, presencia de archivos y diffs. Por debajo del umbral `reviewThreshold`, el resultado se marca para **revisión humana** (`needsHumanReview: true`).
-
-Los pesos y umbrales son configurables vía `confidence.*` (o `CONFIDENCE_*`). Para calibrarlos contra un golden-set:
-
-```bash
-npm run calibrate
-```
-
-El harness evalúa la heurística contra `src/calibration/golden-set.ts` y reporta aciertos/errores. Ampliá el golden-set con casos reales y ajustá los pesos hasta maximizar los aciertos.
-
----
-
-## 📂 Estructura del Informe Diario (`docs/mico/YYYY-MM-DD.md`)
-
-Cada día, el daemon crea o actualiza automáticamente el documento del día:
+Por ejemplo:
 
 ```markdown
 # Informe de Desarrollo - 2026-08-31 🐒
@@ -165,75 +290,250 @@ Cada día, el daemon crea o actualiza automáticamente el documento del día:
 > Documento generado por **Mico**, el agente observador de desarrollo.
 
 ## 📌 Visión General del Día
-Este informe documenta las tareas y cambios realizados durante el día **2026-08-31**.
+
+Este informe documenta las tareas y cambios realizados durante el día
+2026-08-31.
 
 ## 📜 Registro de Commits e Implementaciones
 
----
-
-### 🔨 Commit `a1b2c3d` — feat: agregar autenticación de usuarios
+### 🔨 Commit `a1b2c3d`
+**feat: agregar autenticación de usuarios**
 
 - **Hora:** `14:30:15`
 - **Autor:** Jose
 - **Hash:** `a1b2c3d4e5f6...`
 
-#### 1. Resumen Ejecutivo
+#### Resumen Ejecutivo
+
 Se implementó el servicio de autenticación y gestión de sesiones.
 
-#### 2. Cambios Realizados
-- Adición de middleware de verificación de tokens
-- Creación de rutas de login y logout
+#### Cambios Realizados
 
-#### 3. Impacto
-Módulo de seguridad y endpoints de API protegidos.
+- Middleware de verificación de tokens
+- Rutas de login y logout
+
+#### Impacto
+
+El módulo de seguridad y determinados endpoints de la API
+quedan protegidos mediante autenticación.
 ```
 
 ---
 
-## 💻 Desarrollo Local
+# ⚙️ Configuración
+
+Mico resuelve la configuración en este orden:
+
+```text
+Variables de entorno
+        ↓
+mico.config.json
+        ↓
+valores por defecto
+```
+
+| Configuración | Variable de entorno | Default |
+|---|---|---|
+| `llm.apiKey` | `LLM_API_KEY` | **Obligatorio** |
+| `llm.baseUrl` | `LLM_BASE_URL` | `https://api.openai.com/v1` |
+| `llm.model` | `LLM_MODEL` | `gpt-4o-mini` |
+| `githubToken` | `GITHUB_TOKEN` | vacío |
+| `port` | `PORT` | `3000` |
+| `mico.watchIntervalMs` | `MICO_WATCH_INTERVAL_MS` | `10000` |
+| `mico.targetRepoPath` | `MICO_TARGET_REPO_PATH` | `./` |
+| `mico.outputDir` | `MICO_OUTPUT_DIR` | `./docs/mico` |
+| `mico.stateFile` | `MICO_STATE_FILE` | `./data/mico-state.json` |
+| `documentsPath` | `DOCUMENTS_PATH` | `./data/docs` |
+| `workEventsPath` | `WORK_EVENTS_PATH` | `./data/work-events` |
+| `publish.toRepo` | `PUBLISH_TO_REPO` | `false` |
+| `publish.repo` | `PUBLISH_REPO` | vacío |
+| `publish.branch` | `PUBLISH_BRANCH` | vacío |
+| `publish.pathPrefix` | `PUBLISH_PATH_PREFIX` | `docs/mico` |
+| `confidence.*` | `CONFIDENCE_*` | ver calibración |
+
+### Publicación en GitHub
+
+La publicación al repositorio está desactivada por defecto.
+
+Para habilitarla:
+
+```json
+{
+  "publish": {
+    "toRepo": true,
+    "repo": "owner/repo",
+    "branch": "main",
+    "pathPrefix": "docs/mico"
+  }
+}
+```
+
+Esto permite que la documentación generada por Mico quede almacenada en el repositorio como evidencia del trabajo realizado.
+
+---
+
+# 🎯 Calibración del Confidence Gate
+
+La lógica de confianza es determinista y configurable.
+
+Podés evaluarla contra el golden set del proyecto:
 
 ```bash
-# Instalar dependencias
+npm run calibrate
+```
+
+El harness utiliza:
+
+```text
+src/calibration/golden-set.ts
+```
+
+La idea es ampliar ese conjunto con casos reales y ajustar los pesos/umbrales para que el sistema distinga mejor entre resultados confiables y resultados que necesitan revisión humana.
+
+---
+
+# 🧪 Desarrollo local
+
+Cloná el repositorio e instalá las dependencias:
+
+```bash
 npm install
+```
 
-# Iniciar modo desarrollo con hot-reload (daemon)
+Desarrollo del daemon:
+
+```bash
 npm run dev
+```
 
-# Levantar el servidor REST en desarrollo
+Servidor REST:
+
+```bash
 npx tsx src/cli.ts serve
+```
 
-# Ejecutar la suite de tests (Vitest)
+Tests:
+
+```bash
 npm test
+```
 
-# Typecheck
+Typecheck:
+
+```bash
 npm run typecheck
+```
 
-# Compilar proyecto a dist/
+Build:
+
+```bash
 npm run build
+```
 
-# Calibrar el gate de confianza
+Calibración:
+
+```bash
 npm run calibrate
 ```
 
 ---
 
-## 🐳 Despliegue con Docker
+# 🐳 Docker
+
+Construir la imagen:
 
 ```bash
-# Construir la imagen
 docker build -t mico .
-
-# Ejecutar el daemon (modo por defecto)
-docker run --rm --env-file .env mico
-
-# Ejecutar el servidor REST
-docker run --rm -p 3000:3000 --env-file .env -e MICO_MODE=server mico
 ```
 
-`MICO_MODE` acepta `daemon` (default) o `server`.
+Daemon:
+
+```bash
+docker run --rm --env-file .env mico
+```
+
+Servidor REST:
+
+```bash
+docker run --rm \
+  -p 3000:3000 \
+  --env-file .env \
+  -e MICO_MODE=server \
+  mico
+```
+
+`MICO_MODE` acepta:
+
+```text
+daemon   # default
+server
+```
 
 ---
 
-## 📄 Licencia
+# 🏗️ Filosofía
+
+Mico parte de una idea bastante concreta:
+
+> **El código cambia constantemente. La documentación, casi nunca.**
+
+Los commits ya contienen una parte importante del contexto de desarrollo. El problema es que esa información suele quedar dispersa entre Git, Pull Requests, mensajes y memoria humana.
+
+Mico intenta cerrar ese espacio:
+
+```text
+Código
+  ↓
+Evidencia
+  ↓
+Interpretación
+  ↓
+Memoria
+  ↓
+Documentación
+  ↓
+Resumen
+```
+
+No intenta reemplazar al desarrollador.
+
+Intenta hacer que **el trabajo que ya hiciste sea más fácil de entender, recuperar y comunicar**.
+
+---
+
+# 🚀 Roadmap
+
+Algunas líneas naturales de evolución del proyecto:
+
+- mejorar la calidad de los resúmenes mediante más contexto;
+- enriquecer la memoria de eventos;
+- ampliar la integración con GitHub;
+- mejorar la detección de drift;
+- incorporar más fuentes de evidencia además de Git;
+- añadir más controles sobre la confianza y revisión humana.
+
+---
+
+# 📁 Estructura principal
+
+```text
+.
+├── docs/
+│   └── mico/
+│       └── YYYY-MM-DD.md
+├── data/
+│   ├── docs/
+│   ├── work-events/
+│   └── mico-state.json
+├── src/
+│   ├── calibration/
+│   └── ...
+├── mico.config.json
+└── package.json
+```
+
+---
+
+# 📄 Licencia
 
 Este proyecto se distribuye bajo la licencia [MIT](LICENSE).
