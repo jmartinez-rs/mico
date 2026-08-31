@@ -4,7 +4,7 @@
 
 # Mico 🐒
 
-### Tu agente de desarrollo que convierte commits en documentación viva.
+### Tu proyecto cambia. Mico lo observa y lo recuerda.
 
 **Mico observa lo que construís, entiende los cambios con IA y transforma tu actividad de desarrollo en evidencia, documentación y memoria de proyecto.**
 
