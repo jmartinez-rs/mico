@@ -23,26 +23,7 @@ Mico es un agente autónomo de desarrollo escrito en **Node.js + TypeScript** qu
 
 En lugar de obligarte a escribir documentación manualmente, Mico toma la evidencia disponible —commits, mensajes, archivos y diffs— y utiliza un LLM para convertirla en información útil:
 
-```text
-                 ┌──────────────────────┐
-                 │   Tu repositorio Git │
-                 └──────────┬───────────┘
-                            │
-                         commits
-                            │
-                            ▼
-                    ┌───────────────┐
-                    │   🐒 Mico     │
-                    │               │
-                    │ Git + LLM +   │
-                    │ memoria local │
-                    └───────┬───────┘
-                            │
-              ┌─────────────┼──────────────┐
-              ▼             ▼              ▼
-        📄 Docs diarias   🧠 Memoria    📊 Digests
-                         WorkEvents     semanales
-```
+<img src="public/img/diagrama.png" alt="Flujo de Mico: tu repositorio Git → commits → Mico (Git + LLM + memoria local) → docs diarias, memoria WorkEvents y digests semanales" width="700" />
 
 ### Mico tiene dos formas de trabajar
 
