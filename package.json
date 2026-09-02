@@ -1,15 +1,26 @@
 {
-  "name": "mico",
+  "name": "mico-agent",
   "version": "0.1.0",
   "description": "Mico 🐒 - Agente curioso que monitorea commits de Git en tiempo real y documenta las tareas diarias en Markdown.",
   "type": "module",
   "license": "MIT",
+  "author": "Jose Martinez",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jmartinez-rs/mico.git"
+  },
+  "homepage": "https://github.com/jmartinez-rs/mico#readme",
+  "bugs": {
+    "url": "https://github.com/jmartinez-rs/mico/issues"
+  },
   "bin": {
+    "mico-agent": "./dist/cli.js",
     "mico": "./dist/cli.js"
   },
   "files": [
     "dist",
     "README.md",
+    "README.en.md",
     "LICENSE"
   ],
   "engines": {

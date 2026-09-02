@@ -30,7 +30,8 @@ const HELP_TEXT = `
 🐒 MICO AGENT v${VERSION} — El agente curioso de monitoreo de commits
 
 USO:
-  $ npx mico [comando] [opciones]
+  $ npx mico-agent [comando] [opciones]
+  (o simplemente 'mico [comando]' si está instalado globalmente)
 
 COMANDOS:
   init       Inicializa mico en el proyecto actual (interactivo en TTY, o con --yes usa defaults).
@@ -411,9 +412,12 @@ async function main(): Promise<void> {
 }
 
 // Solo ejecutar el CLI cuando se invoca directamente (node dist/cli.js), no al
-// importar el módulo desde tests u otros entry points.
+// importar el módulo desde tests u otros entry points. Se resuelve la ruta real
+// de argv[1] para que funcione también cuando el binario se invoca a través de
+// un symlink (p. ej. instalación global con `npm link` / `npm install -g`).
 const isDirectRun =
-  process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
+  process.argv[1] &&
+  import.meta.url === pathToFileURL(fs.realpathSync(process.argv[1])).href;
 
 if (isDirectRun) {
   main().catch((err) => {

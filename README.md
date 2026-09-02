@@ -46,7 +46,7 @@ Mico está pensado para probarlo directamente sobre un repositorio existente.
 Desde la raíz de tu proyecto:
 
 ```bash
-npx mico init
+npx mico-agent init
 ```
 
 El asistente interactivo te guía para:
@@ -61,13 +61,13 @@ El asistente interactivo te guía para:
 Para usar los valores por defecto sin interacción:
 
 ```bash
-npx mico init --yes
+npx mico-agent init --yes
 ```
 
 También podés abrir el asistente con:
 
 ```bash
-npx mico config
+npx mico-agent config
 ```
 
 ### 2. Elegí cómo querés que Mico observe los commits
@@ -79,13 +79,13 @@ Hay tres modalidades:
 No necesitás mantener ningún proceso residente. Un `post-commit` dispara el procesamiento automáticamente cada vez que hacés un commit.
 
 ```bash
-npx mico hook install
+npx mico-agent hook install
 ```
 
 Para quitarlo:
 
 ```bash
-npx mico hook uninstall
+npx mico-agent hook uninstall
 ```
 
 #### 🔄 Daemon en segundo plano
@@ -93,14 +93,14 @@ npx mico hook uninstall
 Mico queda ejecutándose de forma continua y monitorea el repositorio sin ocupar tu terminal.
 
 ```bash
-npx mico daemon start
+npx mico-agent daemon start
 ```
 
 Podés consultar su estado y detenerlo cuando quieras:
 
 ```bash
-npx mico daemon status
-npx mico daemon stop
+npx mico-agent daemon status
+npx mico-agent daemon stop
 ```
 
 #### 🖥️ Primer plano
@@ -108,7 +108,7 @@ npx mico daemon stop
 Ideal para desarrollo, debugging y logs en vivo:
 
 ```bash
-npx mico start
+npx mico-agent start
 ```
 
 ---
@@ -213,13 +213,13 @@ La IA aporta contexto. El gate introduce una capa determinista de control.
 Instalá el hook:
 
 ```bash
-npx mico hook install
+npx mico-agent hook install
 ```
 
 Después, cada `git commit` dispara `mico run-once` en segundo plano, sin mantener un proceso residente de Mico.
 
 ```bash
-npx mico hook uninstall
+npx mico-agent hook uninstall
 ```
 
 > El hook requiere que `mico` esté disponible mediante `npx` en el entorno donde se ejecuta el commit.
@@ -227,9 +227,9 @@ npx mico hook uninstall
 ## Opción B — Daemon en segundo plano
 
 ```bash
-npx mico daemon start
-npx mico daemon status
-npx mico daemon stop
+npx mico-agent daemon start
+npx mico-agent daemon status
+npx mico-agent daemon stop
 ```
 
 El daemon guarda su PID y logs en `data/`.
@@ -239,7 +239,7 @@ El daemon guarda su PID y logs en `data/`.
 Para procesar los commits pendientes una sola vez —por ejemplo, desde un cron, CI o el hook—:
 
 ```bash
-npx mico run-once
+npx mico-agent run-once
 ```
 
 ---
@@ -249,32 +249,32 @@ npx mico run-once
 Podés usar Mico sin clonar este repositorio:
 
 ```bash
-npx mico <comando>
+npx mico-agent <comando>
 ```
 
 O instalarlo globalmente:
 
 ```bash
-npm install -g mico
+npm install -g mico-agent
 mico <comando>
 ```
 
 | Comando | Descripción |
 |---|---|
-| `npx mico init` | Inicia el asistente interactivo de configuración. |
-| `npx mico init --yes` | Inicializa usando los valores por defecto. |
-| `npx mico config` | Alias del asistente de configuración. |
-| `npx mico hook install` | Instala el Git Hook `post-commit`. |
-| `npx mico hook uninstall` | Desinstala el Git Hook. |
-| `npx mico daemon start` | Inicia el daemon en segundo plano. |
-| `npx mico daemon status` | Muestra estado y últimas líneas del log. |
-| `npx mico daemon stop` | Detiene el daemon. |
-| `npx mico run-once` | Procesa una única pasada de commits pendientes. |
-| `npx mico start` | Inicia Mico en primer plano. |
-| `npx mico document owner/repo 123` | Genera documentación desde un PR de GitHub. |
-| `npx mico digest --repo owner/repo` | Genera el digest semanal desde la memoria local. |
-| `npx mico --version` | Muestra la versión instalada. |
-| `npx mico --help` | Muestra la ayuda de comandos. |
+| `npx mico-agent init` | Inicia el asistente interactivo de configuración. |
+| `npx mico-agent init --yes` | Inicializa usando los valores por defecto. |
+| `npx mico-agent config` | Alias del asistente de configuración. |
+| `npx mico-agent hook install` | Instala el Git Hook `post-commit`. |
+| `npx mico-agent hook uninstall` | Desinstala el Git Hook. |
+| `npx mico-agent daemon start` | Inicia el daemon en segundo plano. |
+| `npx mico-agent daemon status` | Muestra estado y últimas líneas del log. |
+| `npx mico-agent daemon stop` | Detiene el daemon. |
+| `npx mico-agent run-once` | Procesa una única pasada de commits pendientes. |
+| `npx mico-agent start` | Inicia Mico en primer plano. |
+| `npx mico-agent document owner/repo 123` | Genera documentación desde un PR de GitHub. |
+| `npx mico-agent digest --repo owner/repo` | Genera el digest semanal desde la memoria local. |
+| `npx mico-agent --version` | Muestra la versión instalada. |
+| `npx mico-agent --help` | Muestra la ayuda de comandos. |
 
 ---
 
