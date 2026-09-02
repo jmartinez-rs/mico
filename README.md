@@ -1,17 +1,19 @@
 <div align="center">
 
-<img src="public/img/mico-logo.png" alt="Logo de Mico: mono kawaii con cuaderno y lápiz sobre fondo azul" width="140" />
+<img src="public/img/mico-logo.png" alt="Mico — agente de desarrollo que observa y recuerda la evolución de tu proyecto" width="140" />
 
 # Mico 🐒
 
 ### Tu proyecto cambia. Mico lo observa y lo recuerda.
 
-**Mico observa lo que construís, entiende los cambios con IA y transforma tu actividad de desarrollo en evidencia, documentación y memoria de proyecto.**
+**Mico observa tu actividad de desarrollo, analiza los cambios con IA y convierte la evidencia de Git en documentación, memoria y contexto recuperable.**
 
 [![Node.js](https://img.shields.io/badge/Node.js-20%2B-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Fastify](https://img.shields.io/badge/Fastify-REST-000000?logo=fastify&logoColor=white)](https://fastify.dev/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+
+*Leer en [English](README.en.md)*
 
 </div>
 
@@ -19,40 +21,27 @@
 
 ## 💡 ¿Qué es Mico?
 
-Mico es un agente autónomo de desarrollo escrito en **Node.js + TypeScript** que observa la actividad de un repositorio Git y construye una **memoria estructurada de lo que realmente ocurrió en el proyecto**.
+Mico es un agente autónomo de desarrollo escrito en **Node.js + TypeScript** que observa la actividad de un repositorio Git y construye una **memoria estructurada de lo que ocurre en el proyecto**.
 
-En lugar de obligarte a escribir documentación manualmente, Mico toma la evidencia disponible —commits, mensajes, archivos y diffs— y utiliza un LLM para convertirla en información útil:
+En lugar de depender de que alguien documente manualmente cada avance, Mico toma la evidencia disponible —commits, mensajes, archivos y diffs— y utiliza un LLM para transformarla en información útil.
 
 <div align="center">
 
-<img src="public/img/diagrama.png" alt="Flujo de Mico: tu repositorio Git → commits → Mico (Git + LLM + memoria local) → docs diarias, memoria WorkEvents y digests semanales" width="700" />
+<img src="public/img/diagrama.png" alt="Flujo de Mico: repositorio Git → commits → Mico → documentación diaria, memoria de eventos y digests semanales" width="700" />
 
 </div>
 
-### Mico tiene dos formas de trabajar
+### La idea en una línea
 
-**`mico start` — Daemon**
-
-Mico comprueba periódicamente tu repositorio local, detecta nuevos commits, los analiza con IA y actualiza un informe diario en:
-
-```text
-docs/mico/YYYY-MM-DD.md
-```
-
-Además, cada commit procesado queda guardado como un `WorkEvent`. Eso permite construir resúmenes semanales a partir de la memoria local, sin depender de volver a consultar GitHub.
-
-**`mico document` / `mico digest` — Comandos CLI**
-
-- `mico document <owner/repo> <pr>` genera documentación desde un Pull Request de GitHub;
-- `mico digest --repo owner/repo` genera el digest semanal desde la memoria local de eventos.
+> **Git guarda lo que cambió. Mico intenta conservar qué significa.**
 
 ---
 
-# ⚡ Probalo en menos de 2 minutos
+## 🚀 Empezá en menos de 2 minutos
 
-Mico está pensado para que puedas configurarlo y ponerlo a funcionar en cualquier repositorio en cuestión de segundos:
+Mico está pensado para probarlo directamente sobre un repositorio existente.
 
-### 1. Inicializá Mico con el asistente interactivo
+### 1. Inicializá Mico
 
 Desde la raíz de tu proyecto:
 
@@ -60,105 +49,93 @@ Desde la raíz de tu proyecto:
 npx mico init
 ```
 
-El asistente te guiará en consola para:
-- Seleccionar tu proveedor de IA (**OpenAI**, **Groq**, **Ollama/Local** o personalizado).
-- Ingresar tu API Key (o autodetectar tus variables de entorno si ya existen).
-- Configurar el repositorio y la carpeta de informes (por defecto `docs/mico`).
-- Opcionalmente activar el **Git Hook automático** o iniciar el **daemon en segundo plano**.
+El asistente interactivo te guía para:
 
-> 💡 Si preferís inicializarlo sin preguntas interactivas usando los valores por defecto, ejecutá:  
-> `npx mico init --yes`
+- elegir tu proveedor de IA: **OpenAI, Groq, Ollama/Local o personalizado**;
+- ingresar tu API key o detectar variables de entorno existentes;
+- configurar el repositorio que querés monitorear;
+- elegir dónde guardar los informes;
+- activar opcionalmente el Git Hook;
+- iniciar opcionalmente el daemon en segundo plano.
 
-### 2. Elegí cómo querés que Mico escuche los cambios
+Para usar los valores por defecto sin interacción:
 
-Tenés 3 modalidades disponibles según tu preferencia:
+```bash
+npx mico init --yes
+```
 
-- **Modo Git Hook (Recomendado — 0 MB de RAM en reposo):**  
-  Documenta automáticamente cada vez que hacés un commit:
-  ```bash
-  npx mico hook install
-  ```
-- **Modo Daemon en segundo plano (proceso desasociado):**  
-  Monitorea continuamente sin bloquear tu terminal:
-  ```bash
-  npx mico daemon start
-  ```
-- **Modo en primer plano (ideal para desarrollo y logs en vivo):**  
-  ```bash
-  npx mico start
-  ```
+También podés abrir el asistente con:
 
----
+```bash
+npx mico config
+```
 
-# 🤖 Automatización mediante Git Hook y Daemon en segundo plano
+### 2. Elegí cómo querés que Mico observe los commits
 
-Mico puede documentar tus commits **sin que tengas que dejar un proceso corriendo**. Dos opciones, o ambas:
+Hay tres modalidades:
 
-## Opción A — Git Hook `post-commit` (cero consumo en reposo)
+#### 🪝 Git Hook — recomendado para uso diario
 
-Instala un hook que procesa cada commit automáticamente al hacer `git commit`:
+No necesitás mantener ningún proceso residente. Un `post-commit` dispara el procesamiento automáticamente cada vez que hacés un commit.
 
 ```bash
 npx mico hook install
 ```
 
-A partir de ahí, cada `git commit` dispara `mico run-once` en segundo plano (sin bloquear git) y la documentación se genera al instante. Para desinstalarlo:
+Para quitarlo:
 
 ```bash
 npx mico hook uninstall
 ```
 
-> El hook solo se ejecuta si Mico está disponible como `npx mico` (instalado globalmente o vía `npx`).
+#### 🔄 Daemon en segundo plano
 
-## Opción B — Daemon en segundo plano
-
-Ejecuta Mico como proceso desasociado (guarda PID y logs en `data/`):
+Mico queda ejecutándose de forma continua y monitorea el repositorio sin ocupar tu terminal.
 
 ```bash
-npx mico daemon start     # inicia en segundo plano
-npx mico daemon status    # estado + últimas líneas del log
-npx mico daemon stop      # detiene el daemon
+npx mico daemon start
 ```
 
-## Pasada única
-
-Procesa los commits pendientes una sola vez y termina (útil para cron o el hook):
+Podés consultar su estado y detenerlo cuando quieras:
 
 ```bash
-npx mico run-once
+npx mico daemon status
+npx mico daemon stop
 ```
 
-## Asistente interactivo de configuración
+#### 🖥️ Primer plano
 
-`npx mico init` en una terminal interactiva abre un **wizard** que pregunta proveedor de IA (OpenAI, Groq, Ollama/Local, Personalizado), API key, repo a monitorear, carpeta de informes y si querés instalar el hook y/o iniciar el daemon:
+Ideal para desarrollo, debugging y logs en vivo:
 
 ```bash
-npx mico init            # interactivo (TTY)
-npx mico init --yes      # no interactivo, valores por defecto
-npx mico config          # alias del asistente
+npx mico start
 ```
 
 ---
 
-# ✨ ¿Qué hace exactamente?
+## ✨ ¿Qué hace Mico?
 
-## 🐒 Observa tu actividad
+### 🐒 Observa tu actividad
 
-Mico monitoriza el repositorio local mediante polling configurable y detecta nuevos commits sin cambiar tu flujo de trabajo.
+Mico puede monitorear el repositorio mediante polling configurable y detectar nuevos commits sin modificar tu flujo de trabajo.
 
-## 🤖 Entiende los cambios
+### 🤖 Entiende los cambios
 
-No se limita a copiar el mensaje del commit. Utiliza un LLM para analizar la evidencia disponible y generar un resumen contextual.
+Mico no se limita a repetir el mensaje del commit. Utiliza un LLM para interpretar la evidencia disponible y generar un resumen contextual.
 
-## 📅 Construye documentación diaria
+Es compatible con proveedores que ofrecen una API compatible con OpenAI, incluyendo:
 
-Cada día genera o actualiza:
+**OpenAI · Groq · Ollama · OpenRouter · LM Studio · otros compatibles**
+
+### 📅 Construye documentación diaria
+
+Mico genera o actualiza informes como:
 
 ```text
-docs/mico/2026-08-31.md
+docs/mico/YYYY-MM-DD.md
 ```
 
-Con información como:
+Un informe puede incluir:
 
 - resumen del día;
 - commits detectados;
@@ -166,11 +143,11 @@ Con información como:
 - impacto;
 - evidencia asociada.
 
-## 🧠 Mantiene memoria del trabajo
+### 🧠 Mantiene memoria del trabajo
 
-Cada commit procesado por el daemon se persiste como un `WorkEvent`.
+Cada commit procesado se persiste como un `WorkEvent`.
 
-Un evento puede contener:
+Los eventos pueden conservar información como:
 
 ```text
 repository
@@ -182,11 +159,11 @@ confidence
 needsHumanReview
 ```
 
-Esto permite consultar posteriormente **qué se hizo, cuándo y con qué nivel de confianza**.
+Así podés recuperar posteriormente **qué se hizo, cuándo ocurrió y con qué nivel de confianza fue interpretado**.
 
-## 📊 Genera digests semanales
+### 📊 Genera digests semanales
 
-Mico puede agrupar los eventos de la semana y producir un resumen con:
+La memoria de eventos puede agregarse en un resumen semanal con:
 
 - avances;
 - decisiones;
@@ -194,20 +171,24 @@ Mico puede agrupar los eventos de la semana y producir un resumen con:
 - señales de drift;
 - actividad relevante.
 
-La idea es simple: **tener una memoria del proyecto basada en evidencia, no en lo que alguien recuerda que ocurrió.**
+El objetivo no es crear otro changelog.
 
-## 🚦 No todo se acepta ciegamente
+Es construir una **memoria de desarrollo basada en evidencia**.
 
-Mico incorpora un **Confidence Gate**.
+---
 
-El score de confianza se calcula utilizando heurísticas deterministas basadas, entre otras cosas, en:
+## 🚦 La IA interpreta; el Confidence Gate controla
+
+Mico incorpora un **Confidence Gate** para evitar que una interpretación débil se presente como un hecho confiable.
+
+El score de confianza se calcula mediante heurísticas deterministas que consideran, entre otras cosas:
 
 - calidad de la descripción;
 - calidad de los mensajes de commit;
 - presencia de archivos;
 - información disponible en los diffs.
 
-Cuando el score queda por debajo de `reviewThreshold`, Mico marca el resultado:
+Cuando el resultado queda por debajo de `reviewThreshold`, Mico lo marca para revisión humana:
 
 ```json
 {
@@ -215,48 +196,91 @@ Cuando el score queda por debajo de `reviewThreshold`, Mico marca el resultado:
 }
 ```
 
-La IA ayuda a interpretar la evidencia; el gate intenta evitar que interpretaciones débiles se presenten como hechos.
+Esto mantiene una separación importante:
+
+```text
+Evidencia → interpretación con IA → evaluación de confianza → documentación
+```
+
+La IA aporta contexto. El gate introduce una capa determinista de control.
 
 ---
 
-# 🛠️ Comandos CLI
+# 🪝 Automatización con Git Hook y Daemon
 
-Podés utilizar Mico sin clonar este repositorio usando `npx`:
+## Opción A — Git Hook `post-commit`
+
+Instalá el hook:
+
+```bash
+npx mico hook install
+```
+
+Después, cada `git commit` dispara `mico run-once` en segundo plano, sin mantener un proceso residente de Mico.
+
+```bash
+npx mico hook uninstall
+```
+
+> El hook requiere que `mico` esté disponible mediante `npx` en el entorno donde se ejecuta el commit.
+
+## Opción B — Daemon en segundo plano
+
+```bash
+npx mico daemon start
+npx mico daemon status
+npx mico daemon stop
+```
+
+El daemon guarda su PID y logs en `data/`.
+
+## Pasada única
+
+Para procesar los commits pendientes una sola vez —por ejemplo, desde un cron, CI o el hook—:
+
+```bash
+npx mico run-once
+```
+
+---
+
+# 🧰 Comandos CLI
+
+Podés usar Mico sin clonar este repositorio:
 
 ```bash
 npx mico <comando>
 ```
 
-O instalarlo globalmente en tu máquina:
+O instalarlo globalmente:
 
 ```bash
 npm install -g mico
 mico <comando>
 ```
 
-### Tabla de referencia de comandos
-
 | Comando | Descripción |
 |---|---|
-| `npx mico init` | Inicia el asistente interactivo de configuración (o con `--yes` aplica defaults). |
-| `npx mico config` | Alias del asistente interactivo de configuración. |
-| `npx mico hook install` | Instala el Git Hook `post-commit` (documentación automática sin procesos en memoria). |
-| `npx mico hook uninstall` | Desinstala el Git Hook de Mico. |
-| `npx mico daemon start` | Inicia el daemon continuo en segundo plano (guarda PID y logs en `data/`). |
-| `npx mico daemon status` | Muestra el estado del daemon en background y las últimas líneas de log. |
-| `npx mico daemon stop` | Detiene el daemon en segundo plano. |
-| `npx mico run-once` | Ejecuta una única pasada para procesar commits pendientes y finaliza de inmediato. |
-| `npx mico start` | Inicia el daemon en primer plano (ideal para desarrollo y debugging). |
+| `npx mico init` | Inicia el asistente interactivo de configuración. |
+| `npx mico init --yes` | Inicializa usando los valores por defecto. |
+| `npx mico config` | Alias del asistente de configuración. |
+| `npx mico hook install` | Instala el Git Hook `post-commit`. |
+| `npx mico hook uninstall` | Desinstala el Git Hook. |
+| `npx mico daemon start` | Inicia el daemon en segundo plano. |
+| `npx mico daemon status` | Muestra estado y últimas líneas del log. |
+| `npx mico daemon stop` | Detiene el daemon. |
+| `npx mico run-once` | Procesa una única pasada de commits pendientes. |
+| `npx mico start` | Inicia Mico en primer plano. |
 | `npx mico document owner/repo 123` | Genera documentación desde un PR de GitHub. |
 | `npx mico digest --repo owner/repo` | Genera el digest semanal desde la memoria local. |
-| `npx mico --version` | Muestra la versión actual de Mico. |
+| `npx mico --version` | Muestra la versión instalada. |
 | `npx mico --help` | Muestra la ayuda de comandos. |
 
 ---
 
-# 📄 Un informe generado por Mico
+# 📄 ¿Cómo se ve la documentación?
 
-Por ejemplo:
+Un informe generado por Mico puede verse así:
 
 ```markdown
 # Informe de Desarrollo - 2026-08-31 🐒
@@ -338,7 +362,7 @@ El harness utiliza:
 src/calibration/golden-set.ts
 ```
 
-La idea es ampliar ese conjunto con casos reales y ajustar los pesos/umbrales para que el sistema distinga mejor entre resultados confiables y resultados que necesitan revisión humana.
+La calibración permite ampliar el conjunto de casos reales y ajustar pesos y umbrales para mejorar la separación entre resultados confiables y resultados que requieren revisión humana.
 
 ---
 
@@ -350,13 +374,13 @@ Cloná el repositorio e instalá las dependencias:
 npm install
 ```
 
-Desarrollo del daemon:
+Daemon en desarrollo:
 
 ```bash
 npm run dev
 ```
 
-Documentar un PR o generar un digest:
+Documentación desde un PR o digest:
 
 ```bash
 npx tsx src/cli.ts document owner/repo 123
@@ -369,13 +393,13 @@ Tests:
 npm test
 ```
 
-Tests de integración (infraestructura real: git, stores y server; LLM fake):
+Tests de integración con infraestructura real y LLM fake:
 
 ```bash
 npm run test:integration
 ```
 
-Tests de integración con el LLM real (OpenCode Go / mimo-v2.5 del `.env`):
+Tests de integración con un LLM real:
 
 ```bash
 npm run test:integration:real
@@ -409,7 +433,7 @@ Construir la imagen:
 docker build -t mico .
 ```
 
-Daemon:
+Ejecutar Mico:
 
 ```bash
 docker run --rm --env-file .env mico
@@ -419,11 +443,11 @@ docker run --rm --env-file .env mico
 
 # 🏗️ Filosofía
 
-Mico parte de una idea bastante concreta:
+Mico parte de una idea sencilla:
 
 > **El código cambia constantemente. La documentación, casi nunca.**
 
-Los commits ya contienen una parte importante del contexto de desarrollo. El problema es que esa información suele quedar dispersa entre Git, Pull Requests, mensajes y memoria humana.
+Los commits contienen parte del contexto del desarrollo, pero ese contexto suele quedar fragmentado entre Git, Pull Requests, mensajes y memoria humana.
 
 Mico intenta cerrar ese espacio:
 
@@ -441,22 +465,22 @@ Documentación
 Resumen
 ```
 
-No intenta reemplazar al desarrollador.
+No pretende reemplazar al desarrollador.
 
-Intenta hacer que **el trabajo que ya hiciste sea más fácil de entender, recuperar y comunicar**.
+Pretende que **el trabajo que ya hiciste sea más fácil de entender, recuperar y comunicar**.
 
 ---
 
-# 🚀 Roadmap
+# 🗺️ Roadmap
 
-Algunas líneas naturales de evolución del proyecto:
+Algunas líneas de evolución del proyecto:
 
-- mejorar la calidad de los resúmenes mediante más contexto;
+- mejorar la calidad de los resúmenes incorporando más contexto;
 - enriquecer la memoria de eventos;
 - ampliar la integración con GitHub;
 - mejorar la detección de drift;
-- incorporar más fuentes de evidencia además de Git;
-- añadir más controles sobre la confianza y revisión humana.
+- incorporar nuevas fuentes de evidencia además de Git;
+- añadir más controles sobre confianza y revisión humana.
 
 ---
 
