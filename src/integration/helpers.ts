@@ -88,7 +88,6 @@ export function makeIntegrationConfig(overrides: {
   dataDir: string;
 }): AppConfig {
   return {
-    port: 0,
     githubToken: "",
     llm: { baseUrl: "https://x/v1", apiKey: "key", model: "fake" },
     documentsPath: join(overrides.dataDir, "docs"),
@@ -99,7 +98,6 @@ export function makeIntegrationConfig(overrides: {
       outputDir: join(overrides.dataDir, "docs", "mico"),
       stateFile: join(overrides.dataDir, "state.json"),
     },
-    publish: { toRepo: false, pathPrefix: "docs/mico" },
     confidence: DEFAULT_CONFIDENCE_CONFIG,
   };
 }

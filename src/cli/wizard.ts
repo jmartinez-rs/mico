@@ -148,7 +148,6 @@ export async function runWizard(
 /** Template base de mico.config.json (mismos defaults que `mico init`). */
 export function defaultConfigTemplate(): Record<string, any> {
   return {
-    port: 3000,
     githubToken: "",
     llm: {
       baseUrl: "https://api.openai.com/v1",
@@ -162,12 +161,6 @@ export function defaultConfigTemplate(): Record<string, any> {
       targetRepoPath: "./",
       outputDir: "./docs/mico",
       stateFile: "./data/mico-state.json",
-    },
-    publish: {
-      toRepo: false,
-      repo: "",
-      branch: "",
-      pathPrefix: "docs/mico",
     },
     confidence: {
       reviewThreshold: 0.5,

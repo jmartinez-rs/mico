@@ -51,17 +51,8 @@ export interface GeneratedDocument {
 }
 
 /**
- * Resultado de subir el Markdown generado al repositorio (opcional). Se agrega a
- * la respuesta de los endpoints solo cuando la subida estuvo activa.
+ * Resultado de generar un documento desde un PR.
  */
-export interface RepoUploadResult {
-  committed: boolean;
-  path: string;
-  url?: string;
-  /** Motivo del fallo cuando la subida no se concretó (best-effort). */
-  error?: string;
-}
-
 export interface DocumentGenerationResult {
   status: "completed";
   id: string;
@@ -69,5 +60,4 @@ export interface DocumentGenerationResult {
   documentUrl: string | null;
   confidence: Confidence;
   needsHumanReview: boolean;
-  repoUpload?: RepoUploadResult;
 }

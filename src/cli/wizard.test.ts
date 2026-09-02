@@ -112,7 +112,6 @@ describe("writeConfigFile", () => {
     expect(raw.mico.outputDir).toBe("./informes");
     // El resto conserva los defaults
     expect(raw.mico.watchIntervalMs).toBe(10000);
-    expect(raw.publish.toRepo).toBe(false);
   });
 
   it("no sobrescribe un mico.config.json existente", async () => {

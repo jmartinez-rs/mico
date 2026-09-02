@@ -1,17 +1,11 @@
-import type { PublishConfig } from "../config.js";
 import {
   DEFAULT_CONFIDENCE_CONFIG,
   type ConfidenceConfig,
 } from "../domain/confidence.js";
 import type { Confidence } from "../domain/work-event.js";
-import {
-  buildRepoDigestPath,
-  type RepoPublisher,
-} from "../github/repo-publisher.js";
 import { DIGEST_SYSTEM_PROMPT, buildDigestPrompt } from "../llm/digest-prompt.js";
 import type { LLMProvider } from "../llm/provider.js";
 import type { WorkEventStore } from "../memory/work-event-store.js";
-import type { RepoUploadResult } from "../models/index.js";
 import {
   buildWeeklyDigestView,
   defaultWeekRange,
@@ -25,8 +19,6 @@ export interface GenerateWeeklyDigestInput {
   repository: string;
   from?: string;
   to?: string;
-  /** Fuerza (o inhibe) la subida al repo para este request; si se omite, usa la config. */
-  uploadToRepo?: boolean;
 }
 
 export interface WeeklyDigestResult {
@@ -40,13 +32,10 @@ export interface WeeklyDigestResult {
   confidence: Confidence;
   needsHumanReview: boolean;
   driftCount: number;
-  repoUpload?: RepoUploadResult;
 }
 
 export interface DigestServiceOptions {
   confidence?: ConfidenceConfig;
-  publisher?: RepoPublisher;
-  publish?: PublishConfig;
 }
 
 /**
@@ -57,8 +46,6 @@ export interface DigestServiceOptions {
  */
 export class DigestService {
   private readonly confidenceConfig: ConfidenceConfig;
-  private readonly publisher?: RepoPublisher;
-  private readonly publish?: PublishConfig;
 
   constructor(
     private readonly memory: WorkEventStore,
@@ -67,8 +54,6 @@ export class DigestService {
     options: DigestServiceOptions = {},
   ) {
     this.confidenceConfig = options.confidence ?? DEFAULT_CONFIDENCE_CONFIG;
-    this.publisher = options.publisher;
-    this.publish = options.publish;
   }
 
   async generateWeekly(
@@ -104,15 +89,6 @@ export class DigestService {
     const filePath = buildDigestPath(this.documentsPath, input.repository, weekLabel);
     await writeDocument(filePath, markdown);
 
-    // Aditivo (Fase piloto): tras escribir el .md local, opcionalmente subirlo
-    // al repo como artefacto/evidencia. La subida es opt-in por request o config.
-    const repoUpload = await this.maybePublish(
-      input.repository,
-      view.weekLabel,
-      markdown,
-      input.uploadToRepo,
-    );
-
     return {
       status: "completed",
       repository: view.repository,
@@ -124,45 +100,7 @@ export class DigestService {
       confidence: view.confidence,
       needsHumanReview: view.needsHumanReview,
       driftCount: view.drift.length,
-      ...(repoUpload ? { repoUpload } : {}),
     };
-  }
-
-  /**
-   * Sube el digest semanal al repo si la subida está activa (flag del request o
-   * default de config). El repo destino es `publish.repo` o, si está vacío, el
-   * repo del digest. Devuelve `undefined` si no corresponde subir.
-   *
-   * Best-effort: la salida local (`.md` ya escrito) es el flujo principal. Si la
-   * subida falla, no se propaga la excepción; se devuelve `committed: false` con
-   * el motivo en `error` para que la route lo loguee y responda normalmente.
-   */
-  private async maybePublish(
-    repository: string,
-    weekLabel: string,
-    markdown: string,
-    uploadToRepo?: boolean,
-  ): Promise<RepoUploadResult | undefined> {
-    const shouldUpload = uploadToRepo ?? this.publish?.toRepo ?? false;
-    if (!shouldUpload || !this.publisher || !this.publish) {
-      return undefined;
-    }
-
-    const targetRepo = this.publish.repo ?? repository;
-    const path = buildRepoDigestPath(this.publish.pathPrefix, repository, weekLabel);
-    try {
-      const result = await this.publisher.publishFile({
-        repository: targetRepo,
-        path,
-        content: markdown,
-        message: `docs(mico): digest semanal ${repository} (${weekLabel})`,
-        branch: this.publish.branch,
-      });
-      return { committed: result.committed, path: result.path, url: result.url };
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : String(error);
-      return { committed: false, path, error: message };
-    }
   }
 
   private async buildOverview(

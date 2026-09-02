@@ -5,7 +5,12 @@ import path from "path";
 import { pathToFileURL } from "url";
 import { loadConfig } from "./config.js";
 import { MicoAgent } from "./agent/agent.js";
-import { buildServer } from "./server.js";
+import { DocumentService } from "./documents/document-service.js";
+import { DocumentStore } from "./documents/document-store.js";
+import { DigestService } from "./documents/digest-service.js";
+import { GitHubClient } from "./github/github-client.js";
+import { OpenAICompatibleProvider } from "./llm/openai-provider.js";
+import { WorkEventStore } from "./memory/work-event-store.js";
 import {
   createReadlineQuestioner,
   defaultConfigTemplate,
@@ -31,8 +36,9 @@ COMANDOS:
   init       Inicializa mico en el proyecto actual (interactivo en TTY, o con --yes usa defaults).
   config     Alias de 'init': asistente interactivo de configuración.
   start      Inicia la escucha activa y el análisis de commits (comando por defecto).
-  serve      Levanta el servidor REST (endpoints /health, /v1/*).
   run-once   Ejecuta una única pasada de verificación y procesa commits pendientes.
+  document   Genera documentación desde un PR de GitHub: mico document <owner/repo> <pr-number>.
+  digest     Genera el digest semanal desde la memoria local: mico digest [--repo owner/repo] [--from YYYY-MM-DD] [--to YYYY-MM-DD].
   daemon     Gestiona el daemon en segundo plano: start | stop | status.
   hook       Instala/desinstala el hook de git post-commit: install | uninstall.
 
@@ -46,12 +52,13 @@ EJEMPLOS:
   $ npx mico init --yes
   $ npx mico start
   $ npx mico run-once
+  $ npx mico document owner/repo 123
+  $ npx mico digest --repo owner/repo
   $ npx mico daemon start
   $ npx mico daemon status
   $ npx mico daemon stop
   $ npx mico hook install
   $ npx mico hook uninstall
-  $ npx mico serve
 `;
 
 export async function runInit(cwd: string = process.cwd()): Promise<void> {
@@ -82,9 +89,9 @@ export async function runInit(cwd: string = process.cwd()): Promise<void> {
  🐒 =======================================================
     ¡INICIALIZACIÓN COMPLETADA!
  =======================================================
-   1. Abre 'mico.config.json' y completa 'llm.apiKey' (y 'githubToken' si vas a usar el servidor REST).
+   1. Abre 'mico.config.json' y completa 'llm.apiKey' (y 'githubToken' si vas a documentar PRs).
    2. Ejecuta 'npx mico start' para que Mico comience a escuchar.
-   3. O 'npx mico serve' para levantar el servidor REST.
+   3. O 'npx mico document owner/repo 123' para documentar un PR.
  =======================================================
 `);
 }
@@ -226,31 +233,86 @@ async function runStart(): Promise<void> {
   }
 }
 
-async function runServe(): Promise<void> {
+/** Genera documentación desde un PR de GitHub: `mico document <owner/repo> <pr>`. */
+async function runDocument(): Promise<void> {
+  const args = process.argv.slice(2);
+  const repo = args[1];
+  const prNumber = parseInt(args[2] ?? "", 10);
+
+  if (!repo || !Number.isInteger(prNumber) || prNumber <= 0) {
+    console.error("\n ✗ Uso: mico document <owner/repo> <pr-number>\n");
+    process.exit(1);
+  }
+
   try {
     const config = loadConfig(process.env, process.cwd());
-    const app = await buildServer(config);
+    if (!config.githubToken) {
+      console.error("\n ✗ Se requiere GITHUB_TOKEN en .env o mico.config.json para documentar PRs.\n");
+      process.exit(1);
+    }
 
-    const shutdown = async () => {
-      console.log("\n[Mico 🐒] Recibida señal de apagado. Deteniendo servidor...");
-      await app.close();
-      process.exit(0);
-    };
+    const github = new GitHubClient(config.githubToken);
+    const llm = new OpenAICompatibleProvider(config.llm);
+    const store = new DocumentStore(config.documentsPath);
+    const memory = new WorkEventStore(config.workEventsPath);
+    const service = new DocumentService(github, llm, store, config.documentsPath, memory, {
+      confidence: config.confidence,
+    });
 
-    process.on("SIGINT", shutdown);
-    process.on("SIGTERM", shutdown);
+    console.log(`\n 🐒 Documentando PR #${prNumber} de ${repo}...\n`);
+    const result = await service.generateFromPullRequest({
+      repository: repo,
+      pullRequestNumber: prNumber,
+    });
 
-    await app.listen({ port: config.port, host: "0.0.0.0" });
-    console.log(`\n[Mico 🐒] Servidor REST escuchando en http://localhost:${config.port}`);
-    console.log(`  GET  /health`);
-    console.log(`  POST /v1/documents/from-pull-request`);
-    console.log(`  GET  /v1/documents`);
-    console.log(`  GET  /v1/documents/:id`);
-    console.log(`  GET  /v1/work-events`);
-    console.log(`  GET  /v1/work-events/:id`);
-    console.log(`  POST /v1/digests/weekly`);
+    console.log(`  ✓ Documento generado: ${result.filePath}`);
+    console.log(`  ✓ Confianza: ${result.confidence.level} (score ${result.confidence.score})`);
+    if (result.needsHumanReview) {
+      console.log("  ⚠ Marcado para revisión humana.");
+    }
+    console.log("");
   } catch (error: any) {
-    console.error(`\n[Mico 🐒] Error al iniciar el servidor: ${error.message}\n`);
+    console.error(`\n ✗ Error al documentar el PR: ${error.message}\n`);
+    process.exit(1);
+  }
+}
+
+/** Genera el digest semanal desde la memoria local: `mico digest [--repo] [--from] [--to]`. */
+async function runDigest(): Promise<void> {
+  const args = process.argv.slice(2);
+  const repoFlag = args.indexOf("--repo");
+  const fromFlag = args.indexOf("--from");
+  const toFlag = args.indexOf("--to");
+
+  const repository = repoFlag >= 0 ? args[repoFlag + 1] : undefined;
+  const from = fromFlag >= 0 ? args[fromFlag + 1] : undefined;
+  const to = toFlag >= 0 ? args[toFlag + 1] : undefined;
+
+  if (!repository) {
+    console.error("\n ✗ Uso: mico digest --repo <owner/repo> [--from YYYY-MM-DD] [--to YYYY-MM-DD]\n");
+    process.exit(1);
+  }
+
+  try {
+    const config = loadConfig(process.env, process.cwd());
+    const llm = new OpenAICompatibleProvider(config.llm);
+    const memory = new WorkEventStore(config.workEventsPath);
+    const service = new DigestService(memory, llm, config.documentsPath, {
+      confidence: config.confidence,
+    });
+
+    console.log(`\n 🐒 Generando digest semanal de ${repository}...\n`);
+    const result = await service.generateWeekly({ repository, from, to });
+
+    console.log(`  ✓ Digest generado: ${result.filePath}`);
+    console.log(`  ✓ Semana: ${result.weekLabel} (${result.eventCount} evento(s))`);
+    console.log(`  ✓ Confianza: ${result.confidence.level} (score ${result.confidence.score})`);
+    if (result.needsHumanReview) {
+      console.log("  ⚠ Marcado para revisión humana.");
+    }
+    console.log("");
+  } catch (error: any) {
+    console.error(`\n ✗ Error al generar el digest: ${error.message}\n`);
     process.exit(1);
   }
 }
@@ -285,6 +347,16 @@ async function main(): Promise<void> {
 
   if (command === "run-once") {
     await runRunOnce();
+    return;
+  }
+
+  if (command === "document") {
+    await runDocument();
+    return;
+  }
+
+  if (command === "digest") {
+    await runDigest();
     return;
   }
 
@@ -323,8 +395,9 @@ async function main(): Promise<void> {
   }
 
   if (command === "serve" || command === "server") {
-    await runServe();
-    return;
+    console.error(`❌ El comando 'serve' fue eliminado. Usá 'mico document' o 'mico digest' en su lugar.`);
+    console.log(HELP_TEXT);
+    process.exit(1);
   }
 
   if (!command || command === "start") {

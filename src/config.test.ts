@@ -9,7 +9,6 @@ const baseEnv = {
 describe("loadConfig", () => {
   it("aplica valores por defecto", () => {
     const config = loadConfig(baseEnv as NodeJS.ProcessEnv);
-    expect(config.port).toBe(3000);
     expect(config.llm.baseUrl).toBe("https://api.openai.com/v1");
     expect(config.llm.model).toBe("gpt-4o-mini");
     expect(config.mico.watchIntervalMs).toBe(10000);
@@ -50,11 +49,9 @@ describe("loadConfig", () => {
   it("respeta overrides de entorno", () => {
     const config = loadConfig({
       ...baseEnv,
-      PORT: "8080",
       LLM_BASE_URL: "https://opencode.example/v1",
       LLM_MODEL: "custom-model",
     } as NodeJS.ProcessEnv);
-    expect(config.port).toBe(8080);
     expect(config.llm.baseUrl).toBe("https://opencode.example/v1");
     expect(config.llm.model).toBe("custom-model");
   });
@@ -75,35 +72,5 @@ describe("loadConfig", () => {
     } as NodeJS.ProcessEnv);
     expect(config.confidence.reviewThreshold).toBe(0.6);
     expect(config.confidence.weights.noBody).toBe(0.5);
-  });
-
-  it("deja la subida al repo APAGADA por defecto (no-breaking)", () => {
-    const config = loadConfig(baseEnv as NodeJS.ProcessEnv);
-    expect(config.publish.toRepo).toBe(false);
-    expect(config.publish.repo).toBeUndefined();
-    expect(config.publish.branch).toBeUndefined();
-    expect(config.publish.pathPrefix).toBe("docs/mico");
-  });
-
-  it("parsea PUBLISH_TO_REPO como booleano y respeta overrides de publish", () => {
-    const config = loadConfig({
-      ...baseEnv,
-      PUBLISH_TO_REPO: "true",
-      PUBLISH_REPO: "acme/docs-mirror",
-      PUBLISH_BRANCH: "docs",
-      PUBLISH_PATH_PREFIX: "evidencia/mico",
-    } as NodeJS.ProcessEnv);
-    expect(config.publish.toRepo).toBe(true);
-    expect(config.publish.repo).toBe("acme/docs-mirror");
-    expect(config.publish.branch).toBe("docs");
-    expect(config.publish.pathPrefix).toBe("evidencia/mico");
-  });
-
-  it("no interpreta PUBLISH_TO_REPO='false' como verdadero", () => {
-    const config = loadConfig({
-      ...baseEnv,
-      PUBLISH_TO_REPO: "false",
-    } as NodeJS.ProcessEnv);
-    expect(config.publish.toRepo).toBe(false);
   });
 });

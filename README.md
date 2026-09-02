@@ -41,15 +41,10 @@ docs/mico/YYYY-MM-DD.md
 
 Además, cada commit procesado queda guardado como un `WorkEvent`. Eso permite construir resúmenes semanales a partir de la memoria local, sin depender de volver a consultar GitHub.
 
-**`mico serve` — REST API**
+**`mico document` / `mico digest` — Comandos CLI**
 
-Levanta un servidor Fastify para:
-
-- generar documentación desde Pull Requests de GitHub;
-- consultar documentos generados;
-- consultar la memoria de eventos;
-- generar digests semanales;
-- publicar documentación en GitHub de forma opcional.
+- `mico document <owner/repo> <pr>` genera documentación desde un Pull Request de GitHub;
+- `mico digest --repo owner/repo` genera el digest semanal desde la memoria local de eventos.
 
 ---
 
@@ -252,54 +247,10 @@ mico <comando>
 | `npx mico daemon stop` | Detiene el daemon en segundo plano. |
 | `npx mico run-once` | Ejecuta una única pasada para procesar commits pendientes y finaliza de inmediato. |
 | `npx mico start` | Inicia el daemon en primer plano (ideal para desarrollo y debugging). |
-| `npx mico serve` | Levanta el servidor REST Fastify (endpoints `/health`, `/v1/*`). |
+| `npx mico document owner/repo 123` | Genera documentación desde un PR de GitHub. |
+| `npx mico digest --repo owner/repo` | Genera el digest semanal desde la memoria local. |
 | `npx mico --version` | Muestra la versión actual de Mico. |
 | `npx mico --help` | Muestra la ayuda de comandos. |
-
----
-
-# 🌐 API REST
-
-Con:
-
-```bash
-npx mico serve
-```
-
-Mico expone:
-
-| Método | Endpoint | Descripción |
-|---|---|---|
-| `GET` | `/health` | Estado del servicio |
-| `POST` | `/v1/documents/from-pull-request` | Genera documentación desde un PR |
-| `GET` | `/v1/documents` | Lista documentos generados |
-| `GET` | `/v1/documents/:id` | Obtiene un documento |
-| `GET` | `/v1/work-events` | Consulta la memoria de trabajo |
-| `GET` | `/v1/work-events/:id` | Obtiene un evento |
-| `POST` | `/v1/digests/weekly` | Genera o recupera un digest semanal |
-
-## Generar documentación desde un Pull Request
-
-```bash
-curl -X POST http://localhost:3000/v1/documents/from-pull-request \
-  -H "Content-Type: application/json" \
-  -d '{
-    "repository": "owner/repo",
-    "pullRequestNumber": 123
-  }'
-```
-
-## Generar un digest semanal
-
-```bash
-curl -X POST http://localhost:3000/v1/digests/weekly \
-  -H "Content-Type: application/json" \
-  -d '{
-    "repository": "owner/repo"
-  }'
-```
-
-> El digest utiliza `workEventsPath` como memoria. Esto permite resumir los eventos capturados por el daemon sin depender de consultar GitHub nuevamente.
 
 ---
 
@@ -361,37 +312,13 @@ valores por defecto
 | `llm.baseUrl` | `LLM_BASE_URL` | `https://api.openai.com/v1` |
 | `llm.model` | `LLM_MODEL` | `gpt-4o-mini` |
 | `githubToken` | `GITHUB_TOKEN` | vacío |
-| `port` | `PORT` | `3000` |
 | `mico.watchIntervalMs` | `MICO_WATCH_INTERVAL_MS` | `10000` |
 | `mico.targetRepoPath` | `MICO_TARGET_REPO_PATH` | `./` |
 | `mico.outputDir` | `MICO_OUTPUT_DIR` | `./docs/mico` |
 | `mico.stateFile` | `MICO_STATE_FILE` | `./data/mico-state.json` |
 | `documentsPath` | `DOCUMENTS_PATH` | `./data/docs` |
 | `workEventsPath` | `WORK_EVENTS_PATH` | `./data/work-events` |
-| `publish.toRepo` | `PUBLISH_TO_REPO` | `false` |
-| `publish.repo` | `PUBLISH_REPO` | vacío |
-| `publish.branch` | `PUBLISH_BRANCH` | vacío |
-| `publish.pathPrefix` | `PUBLISH_PATH_PREFIX` | `docs/mico` |
 | `confidence.*` | `CONFIDENCE_*` | ver calibración |
-
-### Publicación en GitHub
-
-La publicación al repositorio está desactivada por defecto.
-
-Para habilitarla:
-
-```json
-{
-  "publish": {
-    "toRepo": true,
-    "repo": "owner/repo",
-    "branch": "main",
-    "pathPrefix": "docs/mico"
-  }
-}
-```
-
-Esto permite que la documentación generada por Mico quede almacenada en el repositorio como evidencia del trabajo realizado.
 
 ---
 
@@ -429,10 +356,11 @@ Desarrollo del daemon:
 npm run dev
 ```
 
-Servidor REST:
+Documentar un PR o generar un digest:
 
 ```bash
-npx tsx src/cli.ts serve
+npx tsx src/cli.ts document owner/repo 123
+npx tsx src/cli.ts digest --repo owner/repo
 ```
 
 Tests:
@@ -485,23 +413,6 @@ Daemon:
 
 ```bash
 docker run --rm --env-file .env mico
-```
-
-Servidor REST:
-
-```bash
-docker run --rm \
-  -p 3000:3000 \
-  --env-file .env \
-  -e MICO_MODE=server \
-  mico
-```
-
-`MICO_MODE` acepta:
-
-```text
-daemon   # default
-server
 ```
 
 ---

@@ -31,8 +31,6 @@ describe("CLI init", () => {
     expect(raw.mico.outputDir).toBe("./docs/mico");
     expect(raw.documentsPath).toBe("./data/docs");
     expect(raw.workEventsPath).toBe("./data/work-events");
-    expect(raw.publish.toRepo).toBe(false);
-    expect(raw.publish.pathPrefix).toBe("docs/mico");
     expect(raw.confidence.reviewThreshold).toBe(0.5);
     // El template ya no incluye el $schema inválido de tsconfig
     expect(raw.$schema).toBeUndefined();
@@ -57,9 +55,7 @@ describe("CLI init", () => {
     // Con apiKey: carga con los defaults del template
     const config = loadConfig({ LLM_API_KEY: "test-key" }, tempDir);
     expect(config.llm.model).toBe("gpt-4o-mini");
-    expect(config.port).toBe(3000);
     expect(config.mico.outputDir).toBe("./docs/mico");
-    expect(config.publish.pathPrefix).toBe("docs/mico");
     expect(config.confidence.reviewThreshold).toBe(0.5);
   });
 });

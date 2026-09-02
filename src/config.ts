@@ -4,7 +4,6 @@ import { z } from "zod";
 loadEnv();
 
 const configSchema = z.object({
-  port: z.coerce.number().int().positive().default(3000),
   githubToken: z.string().optional().default(""),
   llm: z.object({
     baseUrl: z.string().url().default("https://api.openai.com/v1"),
@@ -18,27 +17,6 @@ const configSchema = z.object({
     targetRepoPath: z.string().min(1).default("./"),
     outputDir: z.string().min(1).default("./docs/mico"),
     stateFile: z.string().min(1).default("./data/mico-state.json"),
-  }),
-  publish: z.object({
-    // Feature APAGADA por defecto (aditiva, no-breaking): el piloto sigue
-    // entregando el Markdown local y la subida al repo es opt-in.
-    toRepo: z
-      .preprocess(
-        (value) =>
-          typeof value === "string"
-            ? value.trim().toLowerCase() === "true" || value.trim() === "1"
-            : value,
-        z.boolean(),
-      )
-      .default(false),
-    // Repo destino `owner/repo`. Si se omite, se usa el repo de origen del PR/digest.
-    repo: z
-      .string()
-      .regex(/^[^/\s]+\/[^/\s]+$/, 'Se espera el formato "owner/repo"')
-      .optional(),
-    // Rama destino. Si se omite, GitHub usa la rama por defecto del repo.
-    branch: z.string().min(1).optional(),
-    pathPrefix: z.string().min(1).default("docs/mico"),
   }),
   confidence: z.object({
     reviewThreshold: z.coerce.number().min(0).max(1).default(0.5),
@@ -57,7 +35,6 @@ const configSchema = z.object({
 });
 
 export type AppConfig = z.infer<typeof configSchema>;
-export type PublishConfig = AppConfig["publish"];
 export type MicoConfig = AppConfig["mico"];
 
 import fs from "fs";
@@ -80,7 +57,6 @@ export function loadConfig(
   }
 
   const parsed = configSchema.safeParse({
-    port: env.PORT ?? fileConfig.port,
     githubToken: env.GITHUB_TOKEN ?? fileConfig.githubToken,
     llm: {
       baseUrl: env.LLM_BASE_URL ?? fileConfig.llmBaseUrl ?? fileConfig.llm?.baseUrl,
@@ -94,12 +70,6 @@ export function loadConfig(
       targetRepoPath: env.MICO_TARGET_REPO_PATH ?? fileConfig.targetRepoPath ?? fileConfig.mico?.targetRepoPath,
       outputDir: env.MICO_OUTPUT_DIR ?? fileConfig.outputDir ?? fileConfig.mico?.outputDir,
       stateFile: env.MICO_STATE_FILE ?? fileConfig.stateFile ?? fileConfig.mico?.stateFile,
-    },
-    publish: {
-      toRepo: env.PUBLISH_TO_REPO ?? fileConfig.publishToRepo ?? fileConfig.publish?.toRepo,
-      repo: env.PUBLISH_REPO || fileConfig.publishRepo || fileConfig.publish?.repo || undefined,
-      branch: env.PUBLISH_BRANCH || fileConfig.publishBranch || fileConfig.publish?.branch || undefined,
-      pathPrefix: env.PUBLISH_PATH_PREFIX || fileConfig.publishPathPrefix || fileConfig.publish?.pathPrefix || undefined,
     },
     confidence: {
       reviewThreshold: env.CONFIDENCE_REVIEW_THRESHOLD,

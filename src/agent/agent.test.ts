@@ -12,7 +12,6 @@ import type { CommitAnalysisResult } from "../llm/commit-analyzer.js";
 
 function makeConfig(overrides: Partial<AppConfig> = {}): AppConfig {
   return {
-    port: 3000,
     githubToken: "",
     llm: { baseUrl: "https://api.openai.com/v1", apiKey: "test-key", model: "gpt-4o-mini" },
     documentsPath: "./data/docs",
@@ -23,7 +22,6 @@ function makeConfig(overrides: Partial<AppConfig> = {}): AppConfig {
       outputDir: "./docs/mico",
       stateFile: "./data/mico-state.json",
     },
-    publish: { toRepo: false, pathPrefix: "docs/mico" },
     confidence: {
       reviewThreshold: 0.5,
       highThreshold: 0.75,
