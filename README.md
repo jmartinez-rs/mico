@@ -27,7 +27,7 @@ En lugar de depender de que alguien documente manualmente cada avance, Mico toma
 
 <div align="center">
 
-<img src="public/img/diagrama.png" alt="Flujo de Mico: repositorio Git → commits → Mico → documentación diaria, memoria de eventos y digests semanales" width="700" />
+<img src="public/img/diagrama-es.png" alt="Flujo de Mico: repositorio Git → commits → Mico → documentación diaria, memoria de eventos y digests semanales" width="700" />
 
 </div>
 

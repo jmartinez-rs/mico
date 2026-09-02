@@ -26,7 +26,7 @@ Instead of relying on someone to manually write documentation for every mileston
 
 <div align="center">
 
-<img src="public/img/diagrama.png" alt="Mico workflow: Git repo → commits → Mico → daily docs, work events memory, and weekly digests" width="700" />
+<img src="public/img/diagrama-en.png" alt="Mico workflow: Git repo → commits → Mico → daily docs, work events memory, and weekly digests" width="700" />
 
 </div>
 
