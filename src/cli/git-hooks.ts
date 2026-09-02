@@ -12,7 +12,7 @@ import path from "node:path";
 export const MICO_HOOK_MARKER = "# Mico 🐒 post-commit hook";
 
 /** Comando por defecto que ejecuta el hook (procesa commits pendientes). */
-export const DEFAULT_HOOK_COMMAND = "npx mico run-once";
+export const DEFAULT_HOOK_COMMAND = "npx mico-agent run-once";
 
 /** Construye el contenido del script del hook. */
 export function buildHookScript(command: string = DEFAULT_HOOK_COMMAND): string {

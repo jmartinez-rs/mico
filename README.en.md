@@ -26,7 +26,7 @@ Instead of relying on someone to manually write documentation for every mileston
 
 <div align="center">
 
-<img src="public/img/diagrama.png" alt="Mico workflow: Git repo → commits → Mico → daily docs, work events memory, and weekly digests" width="700" />
+<img src="public/img/diagrama-en.png" alt="Mico workflow: Git repo → commits → Mico → daily docs, work events memory, and weekly digests" width="700" />
 
 </div>
 
@@ -45,7 +45,7 @@ Mico is designed to run directly on any existing repository without friction.
 From your project root:
 
 ```bash
-npx mico init
+npx mico-agent init
 ```
 
 The CLI wizard will guide you through:
@@ -58,13 +58,13 @@ The CLI wizard will guide you through:
 To use default options without interactive prompts:
 
 ```bash
-npx mico init --yes
+npx mico-agent init --yes
 ```
 
 You can also re-run the wizard anytime with:
 
 ```bash
-npx mico config
+npx mico-agent config
 ```
 
 ### 2. Choose how you want Mico to monitor commits
@@ -76,13 +76,13 @@ Pick one of the three available modes:
 Zero resident RAM consumption. A `post-commit` hook automatically triggers Mico in the background right after each commit:
 
 ```bash
-npx mico hook install
+npx mico-agent hook install
 ```
 
 To uninstall:
 
 ```bash
-npx mico hook uninstall
+npx mico-agent hook uninstall
 ```
 
 #### 🔄 Background Daemon
@@ -90,14 +90,14 @@ npx mico hook uninstall
 Mico runs continuously in a detached background process, monitoring your repo periodically without holding up your terminal:
 
 ```bash
-npx mico daemon start
+npx mico-agent daemon start
 ```
 
 Check status and logs, or stop it anytime:
 
 ```bash
-npx mico daemon status
-npx mico daemon stop
+npx mico-agent daemon status
+npx mico-agent daemon stop
 ```
 
 #### 🖥️ Foreground Mode
@@ -105,7 +105,7 @@ npx mico daemon stop
 Best for local testing and live debugging:
 
 ```bash
-npx mico start
+npx mico-agent start
 ```
 
 ---
@@ -159,25 +159,25 @@ Evidence → AI Interpretation → Confidence Gate → Documentation
 Run Mico directly via `npx` or install globally:
 
 ```bash
-npm install -g mico
+npm install -g mico-agent
 ```
 
 | Command | Description |
 |---|---|
-| `npx mico init` | Launch the interactive configuration wizard. |
-| `npx mico init --yes` | Initialize with default settings (non-interactive). |
-| `npx mico config` | Alias for `init` wizard. |
-| `npx mico hook install` | Install the `post-commit` Git hook. |
-| `npx mico hook uninstall` | Remove the Mico Git hook. |
-| `npx mico daemon start` | Start the daemon in the background. |
-| `npx mico daemon status` | Show daemon status and latest log lines. |
-| `npx mico daemon stop` | Stop the background daemon. |
-| `npx mico run-once` | Run a single pass over pending commits and exit. |
-| `npx mico start` | Run Mico in foreground mode. |
-| `npx mico document owner/repo 123` | Generate documentation for a specific GitHub PR. |
-| `npx mico digest --repo owner/repo` | Generate a weekly digest from local memory. |
-| `npx mico --version` | Display installed version. |
-| `npx mico --help` | Show command line help. |
+| `npx mico-agent init` | Launch the interactive configuration wizard. |
+| `npx mico-agent init --yes` | Initialize with default settings (non-interactive). |
+| `npx mico-agent config` | Alias for `init` wizard. |
+| `npx mico-agent hook install` | Install the `post-commit` Git hook. |
+| `npx mico-agent hook uninstall` | Remove the Mico Git hook. |
+| `npx mico-agent daemon start` | Start the daemon in the background. |
+| `npx mico-agent daemon status` | Show daemon status and latest log lines. |
+| `npx mico-agent daemon stop` | Stop the background daemon. |
+| `npx mico-agent run-once` | Run a single pass over pending commits and exit. |
+| `npx mico-agent start` | Run Mico in foreground mode. |
+| `npx mico-agent document owner/repo 123` | Generate documentation for a specific GitHub PR. |
+| `npx mico-agent digest --repo owner/repo` | Generate a weekly digest from local memory. |
+| `npx mico-agent --version` | Display installed version. |
+| `npx mico-agent --help` | Show command line help. |
 
 ---
 
