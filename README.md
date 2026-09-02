@@ -31,10 +31,6 @@ En lugar de depender de que alguien documente manualmente cada avance, Mico toma
 
 </div>
 
-### La idea en una línea
-
-> **Git guarda lo que cambió. Mico intenta conservar qué significa.**
-
 ---
 
 ## 🚀 Empezá en menos de 2 minutos
