@@ -55,9 +55,9 @@ Levanta un servidor Fastify para:
 
 # ⚡ Probalo en menos de 2 minutos
 
-Mico está pensado para que puedas probarlo directamente sobre un repositorio existente.
+Mico está pensado para que puedas configurarlo y ponerlo a funcionar en cualquier repositorio en cuestión de segundos:
 
-### 1. Inicializá Mico
+### 1. Inicializá Mico con el asistente interactivo
 
 Desde la raíz de tu proyecto:
 
@@ -65,53 +65,83 @@ Desde la raíz de tu proyecto:
 npx mico init
 ```
 
-Esto crea:
+El asistente te guiará en consola para:
+- Seleccionar tu proveedor de IA (**OpenAI**, **Groq**, **Ollama/Local** o personalizado).
+- Ingresar tu API Key (o autodetectar tus variables de entorno si ya existen).
+- Configurar el repositorio y la carpeta de informes (por defecto `docs/mico`).
+- Opcionalmente activar el **Git Hook automático** o iniciar el **daemon en segundo plano**.
 
-```text
-mico.config.json
-docs/mico/
-```
+> 💡 Si preferís inicializarlo sin preguntas interactivas usando los valores por defecto, ejecutá:  
+> `npx mico init --yes`
 
-### 2. Configurá tu proveedor LLM
+### 2. Elegí cómo querés que Mico escuche los cambios
 
-Editá `mico.config.json`:
+Tenés 3 modalidades disponibles según tu preferencia:
 
-```json
-{
-  "port": 3000,
-  "githubToken": "",
-  "llm": {
-    "baseUrl": "https://api.openai.com/v1",
-    "apiKey": "TU_API_KEY",
-    "model": "gpt-4o-mini"
-  },
-  "documentsPath": "./data/docs",
-  "workEventsPath": "./data/work-events",
-  "mico": {
-    "watchIntervalMs": 10000,
-    "targetRepoPath": "./",
-    "outputDir": "./docs/mico",
-    "stateFile": "./data/mico-state.json"
-  }
-}
-```
+- **Modo Git Hook (Recomendado — 0 MB de RAM en reposo):**  
+  Documenta automáticamente cada vez que hacés un commit:
+  ```bash
+  npx mico hook install
+  ```
+- **Modo Daemon en segundo plano (proceso desasociado):**  
+  Monitorea continuamente sin bloquear tu terminal:
+  ```bash
+  npx mico daemon start
+  ```
+- **Modo en primer plano (ideal para desarrollo y logs en vivo):**  
+  ```bash
+  npx mico start
+  ```
 
-No estás limitado a OpenAI. Mico trabaja con cualquier proveedor que exponga una API compatible con OpenAI, por ejemplo:
+---
 
-- OpenAI
-- Ollama
-- OpenRouter
-- Groq
-- LM Studio
-- otros proveedores compatibles
+# 🤖 Automatización mediante Git Hook y Daemon en segundo plano
 
-### 3. Dejá que Mico observe
+Mico puede documentar tus commits **sin que tengas que dejar un proceso corriendo**. Dos opciones, o ambas:
+
+## Opción A — Git Hook `post-commit` (cero consumo en reposo)
+
+Instala un hook que procesa cada commit automáticamente al hacer `git commit`:
 
 ```bash
-npx mico start
+npx mico hook install
 ```
 
-A partir de ahí, cada commit nuevo que Mico detecte puede convertirse en documentación y memoria de trabajo.
+A partir de ahí, cada `git commit` dispara `mico run-once` en segundo plano (sin bloquear git) y la documentación se genera al instante. Para desinstalarlo:
+
+```bash
+npx mico hook uninstall
+```
+
+> El hook solo se ejecuta si Mico está disponible como `npx mico` (instalado globalmente o vía `npx`).
+
+## Opción B — Daemon en segundo plano
+
+Ejecuta Mico como proceso desasociado (guarda PID y logs en `data/`):
+
+```bash
+npx mico daemon start     # inicia en segundo plano
+npx mico daemon status    # estado + últimas líneas del log
+npx mico daemon stop      # detiene el daemon
+```
+
+## Pasada única
+
+Procesa los commits pendientes una sola vez y termina (útil para cron o el hook):
+
+```bash
+npx mico run-once
+```
+
+## Asistente interactivo de configuración
+
+`npx mico init` en una terminal interactiva abre un **wizard** que pregunta proveedor de IA (OpenAI, Groq, Ollama/Local, Personalizado), API key, repo a monitorear, carpeta de informes y si querés instalar el hook y/o iniciar el daemon:
+
+```bash
+npx mico init            # interactivo (TTY)
+npx mico init --yes      # no interactivo, valores por defecto
+npx mico config          # alias del asistente
+```
 
 ---
 
@@ -194,29 +224,37 @@ La IA ayuda a interpretar la evidencia; el gate intenta evitar que interpretacio
 
 ---
 
-# 🛠️ Instalación
+# 🛠️ Comandos CLI
 
-Podés utilizar Mico sin clonar este repositorio:
+Podés utilizar Mico sin clonar este repositorio usando `npx`:
 
 ```bash
-npx mico init
-npx mico start
+npx mico <comando>
 ```
 
-O instalarlo globalmente:
+O instalarlo globalmente en tu máquina:
 
 ```bash
 npm install -g mico
-
-mico init
-mico start
+mico <comando>
 ```
 
-Para ejecutar el servidor REST:
+### Tabla de referencia de comandos
 
-```bash
-npx mico serve
-```
+| Comando | Descripción |
+|---|---|
+| `npx mico init` | Inicia el asistente interactivo de configuración (o con `--yes` aplica defaults). |
+| `npx mico config` | Alias del asistente interactivo de configuración. |
+| `npx mico hook install` | Instala el Git Hook `post-commit` (documentación automática sin procesos en memoria). |
+| `npx mico hook uninstall` | Desinstala el Git Hook de Mico. |
+| `npx mico daemon start` | Inicia el daemon continuo en segundo plano (guarda PID y logs en `data/`). |
+| `npx mico daemon status` | Muestra el estado del daemon en background y las últimas líneas de log. |
+| `npx mico daemon stop` | Detiene el daemon en segundo plano. |
+| `npx mico run-once` | Ejecuta una única pasada para procesar commits pendientes y finaliza de inmediato. |
+| `npx mico start` | Inicia el daemon en primer plano (ideal para desarrollo y debugging). |
+| `npx mico serve` | Levanta el servidor REST Fastify (endpoints `/health`, `/v1/*`). |
+| `npx mico --version` | Muestra la versión actual de Mico. |
+| `npx mico --help` | Muestra la ayuda de comandos. |
 
 ---
 
@@ -401,6 +439,18 @@ Tests:
 
 ```bash
 npm test
+```
+
+Tests de integración (infraestructura real: git, stores y server; LLM fake):
+
+```bash
+npm run test:integration
+```
+
+Tests de integración con el LLM real (OpenCode Go / mimo-v2.5 del `.env`):
+
+```bash
+npm run test:integration:real
 ```
 
 Typecheck:

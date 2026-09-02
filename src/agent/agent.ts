@@ -86,6 +86,16 @@ export class MicoAgent {
   }
 
   /**
+   * Ejecuta una única pasada de verificación y procesamiento (carga el estado
+   * persistido y hace un `tick`). Ideal para `mico run-once` y el hook
+   * `post-commit`: procesa los commits pendientes y finaliza de inmediato.
+   */
+  async runOnce(): Promise<void> {
+    await this.stateStore.load();
+    await this.tick();
+  }
+
+  /**
    * Ciclo individual de verificación y procesamiento de nuevos commits.
    */
   async tick(): Promise<void> {

@@ -22,6 +22,8 @@
     "typecheck": "node node_modules/typescript/bin/tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:integration": "vitest run src/integration/",
+    "test:integration:real": "MICO_INTEGRATION_REAL_LLM=1 vitest run src/integration/",
     "calibrate": "tsx src/calibration/run.ts"
   },
   "dependencies": {

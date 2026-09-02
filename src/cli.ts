@@ -6,6 +6,18 @@ import { pathToFileURL } from "url";
 import { loadConfig } from "./config.js";
 import { MicoAgent } from "./agent/agent.js";
 import { buildServer } from "./server.js";
+import {
+  createReadlineQuestioner,
+  defaultConfigTemplate,
+  runWizard,
+  writeConfigFile,
+} from "./cli/wizard.js";
+import { installGitHook, uninstallGitHook } from "./cli/git-hooks.js";
+import {
+  startDaemon,
+  statusDaemon,
+  stopDaemon,
+} from "./cli/daemon-manager.js";
 
 const VERSION = "0.1.0";
 
@@ -16,17 +28,29 @@ USO:
   $ npx mico [comando] [opciones]
 
 COMANDOS:
-  init       Inicializa mico en el proyecto actual creando 'mico.config.json' y la carpeta '/docs/mico'.
+  init       Inicializa mico en el proyecto actual (interactivo en TTY, o con --yes usa defaults).
+  config     Alias de 'init': asistente interactivo de configuración.
   start      Inicia la escucha activa y el análisis de commits (comando por defecto).
   serve      Levanta el servidor REST (endpoints /health, /v1/*).
+  run-once   Ejecuta una única pasada de verificación y procesa commits pendientes.
+  daemon     Gestiona el daemon en segundo plano: start | stop | status.
+  hook       Instala/desinstala el hook de git post-commit: install | uninstall.
 
 OPCIONES:
   -v, --version   Muestra la versión de Mico.
   -h, --help      Muestra este mensaje de ayuda.
+  --yes, --defaults  Inicializa con valores por defecto sin preguntar.
 
 EJEMPLOS:
   $ npx mico init
+  $ npx mico init --yes
   $ npx mico start
+  $ npx mico run-once
+  $ npx mico daemon start
+  $ npx mico daemon status
+  $ npx mico daemon stop
+  $ npx mico hook install
+  $ npx mico hook uninstall
   $ npx mico serve
 `;
 
@@ -46,43 +70,7 @@ export async function runInit(cwd: string = process.cwd()): Promise<void> {
 
   // 2. Crear mico.config.json
   if (!fs.existsSync(configPath)) {
-    const defaultConfig = {
-      port: 3000,
-      githubToken: "",
-      llm: {
-        baseUrl: "https://api.openai.com/v1",
-        apiKey: "",
-        model: "gpt-4o-mini",
-      },
-      documentsPath: "./data/docs",
-      workEventsPath: "./data/work-events",
-      mico: {
-        watchIntervalMs: 10000,
-        targetRepoPath: "./",
-        outputDir: "./docs/mico",
-        stateFile: "./data/mico-state.json",
-      },
-      publish: {
-        toRepo: false,
-        repo: "",
-        branch: "",
-        pathPrefix: "docs/mico",
-      },
-      confidence: {
-        reviewThreshold: 0.5,
-        highThreshold: 0.75,
-        minBodyLength: 30,
-        poorCommitRatio: 0.5,
-        weights: {
-          noBody: 0.35,
-          shortBody: 0.15,
-          noCommits: 0.1,
-          poorCommits: 0.2,
-          noFiles: 0.1,
-          noDiff: 0.1,
-        },
-      },
-    };
+    const defaultConfig = defaultConfigTemplate();
 
     fs.writeFileSync(configPath, JSON.stringify(defaultConfig, null, 2), "utf-8");
     console.log(`  ✓ Archivo de configuración creado: ${configPath}`);
@@ -99,6 +87,121 @@ export async function runInit(cwd: string = process.cwd()): Promise<void> {
    3. O 'npx mico serve' para levantar el servidor REST.
  =======================================================
 `);
+}
+
+/**
+ * Asistente interactivo de configuración (`mico init` en TTY / `mico config`).
+ * Pregunta proveedor, API key, rutas y automatización; guarda la config y
+ * opcionalmente instala el hook y/o inicia el daemon según las respuestas.
+ */
+export async function runConfig(cwd: string = process.cwd()): Promise<void> {
+  console.log("\n 🐒 Asistente de configuración de Mico\n");
+
+  const questioner = createReadlineQuestioner();
+  const answers = await runWizard(questioner);
+
+  const configPath = writeConfigFile(cwd, answers);
+  if (!configPath) {
+    console.log("  ℹ 'mico.config.json' ya existe. No se sobrescribió.");
+  } else {
+    console.log(`  ✓ Configuración guardada en ${configPath}`);
+  }
+
+  const docsPath = path.join(cwd, answers.outputDir);
+  fs.mkdirSync(docsPath, { recursive: true });
+  console.log(`  ✓ Carpeta de informes: ${docsPath}`);
+
+  if (answers.installHook) {
+    try {
+      const hook = await installGitHook(cwd);
+      console.log(`  ✓ Hook post-commit instalado: ${hook}`);
+    } catch (error: any) {
+      console.error(`  ⚠ No se pudo instalar el hook: ${error.message}`);
+    }
+  }
+
+  if (answers.startDaemon) {
+    try {
+      const { pid } = await startDaemon({ cwd });
+      console.log(`  ✓ Daemon iniciado en segundo plano (PID ${pid}).`);
+    } catch (error: any) {
+      console.error(`  ⚠ No se pudo iniciar el daemon: ${error.message}`);
+    }
+  }
+
+  console.log(`
+ 🐒 =======================================================
+    ¡CONFIGURACIÓN COMPLETADA!
+ =======================================================
+   • 'npx mico start'      → escucha continua en primer plano.
+   • 'npx mico run-once'   → procesa commits pendientes una vez.
+   • 'npx mico daemon'     → start | stop | status (segundo plano).
+   • 'npx mico hook'       → install | uninstall (post-commit).
+ =======================================================
+`);
+}
+
+/** Ejecuta una única pasada de verificación (para run-once y el git hook). */
+async function runRunOnce(): Promise<void> {
+  const config = loadConfig(process.env, process.cwd());
+  const agent = new MicoAgent(config);
+  await agent.runOnce();
+  console.log("[Mico 🐒] Pasada única completada.");
+}
+
+async function runDaemonStart(): Promise<void> {
+  const cwd = process.cwd();
+  try {
+    const { pid, paths } = await startDaemon({ cwd });
+    console.log(`\n ✓ Daemon de Mico iniciado en segundo plano (PID ${pid}).`);
+    console.log(`   Logs: ${paths.logFile}\n`);
+  } catch (error: any) {
+    console.error(`\n ✗ ${error.message}\n`);
+    process.exit(1);
+  }
+}
+
+async function runDaemonStop(): Promise<void> {
+  const { stopped, pid } = await stopDaemon({ cwd: process.cwd() });
+  if (stopped) {
+    console.log(`\n ✓ Daemon de Mico detenido (PID ${pid}).\n`);
+  } else {
+    console.log("\n ℹ No había un daemon de Mico corriendo.\n");
+  }
+}
+
+async function runDaemonStatus(): Promise<void> {
+  const status = await statusDaemon({ cwd: process.cwd() });
+  if (status.running) {
+    console.log(`\n ✓ Mico está corriendo en segundo plano (PID ${status.pid}).\n`);
+    if (status.logTail) {
+      console.log("--- Últimas líneas del log ---\n");
+      console.log(status.logTail);
+      console.log("");
+    }
+  } else {
+    console.log("\n ✗ Mico no está corriendo en segundo plano.\n");
+  }
+}
+
+async function runHookInstall(): Promise<void> {
+  const cwd = process.cwd();
+  try {
+    const hook = await installGitHook(cwd);
+    console.log(`\n ✓ Hook post-commit instalado en ${hook}\n`);
+  } catch (error: any) {
+    console.error(`\n ✗ ${error.message}\n`);
+    process.exit(1);
+  }
+}
+
+async function runHookUninstall(): Promise<void> {
+  const removed = await uninstallGitHook(process.cwd());
+  if (removed) {
+    console.log("\n ✓ Hook post-commit de Mico desinstalado.\n");
+  } else {
+    console.log("\n ℹ No había un hook de Mico instalado.\n");
+  }
 }
 
 async function runStart(): Promise<void> {
@@ -155,6 +258,7 @@ async function runServe(): Promise<void> {
 async function main(): Promise<void> {
   const args = process.argv.slice(2);
   const command = args[0];
+  const flags = args.slice(1);
 
   if (command === "-v" || command === "--version") {
     console.log(`Mico v${VERSION}`);
@@ -166,9 +270,56 @@ async function main(): Promise<void> {
     return;
   }
 
-  if (command === "init") {
-    await runInit();
+  if (command === "init" || command === "config") {
+    const nonInteractive =
+      flags.includes("--yes") ||
+      flags.includes("--defaults") ||
+      !process.stdin.isTTY;
+    if (nonInteractive) {
+      await runInit();
+    } else {
+      await runConfig();
+    }
     return;
+  }
+
+  if (command === "run-once") {
+    await runRunOnce();
+    return;
+  }
+
+  if (command === "daemon") {
+    const sub = args[1];
+    if (sub === "start") {
+      await runDaemonStart();
+      return;
+    }
+    if (sub === "stop") {
+      await runDaemonStop();
+      return;
+    }
+    if (sub === "status") {
+      await runDaemonStatus();
+      return;
+    }
+    console.error(`❌ Subcomando daemon no reconocido: '${sub}'`);
+    console.log(HELP_TEXT);
+    process.exit(1);
+  }
+
+  if (command === "hook") {
+    const sub = args[1];
+    if (sub === "install") {
+      await runHookInstall();
+      return;
+    }
+    if (sub === "uninstall") {
+      await runHookUninstall();
+      return;
+    }
+    console.error(`❌ Subcomando hook no reconocido: '${sub}'`);
+    console.log(HELP_TEXT);
+    process.exit(1);
   }
 
   if (command === "serve" || command === "server") {
