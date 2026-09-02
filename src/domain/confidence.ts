@@ -1,4 +1,4 @@
-import type { PullRequestData } from "../models/index.js";
+import type { PullRequestData } from "./types.js";
 import type { Confidence, ConfidenceLevel } from "./work-event.js";
 
 /**

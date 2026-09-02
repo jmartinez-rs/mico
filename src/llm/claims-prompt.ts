@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { PullRequestData } from "../models/index.js";
+import type { PullRequestData } from "../domain/types.js";
 import { buildPrompt } from "./prompt.js";
 
 /**

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { Confidence, Evidence } from "../domain/work-event.js";
 import type { LLMProvider } from "../llm/provider.js";
-import type { PullRequestData } from "../models/index.js";
+import type { PullRequestData } from "../domain/types.js";
 import { extractClaims } from "./claim-extractor.js";
 
 const pr: PullRequestData = {
