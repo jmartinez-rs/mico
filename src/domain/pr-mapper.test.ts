@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { PullRequestData } from "../models/index.js";
+import type { PullRequestData } from "./types.js";
 import { mapPullRequestToWorkEvent } from "./pr-mapper.js";
 
 const pr: PullRequestData = {

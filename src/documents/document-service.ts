@@ -14,7 +14,7 @@ import type {
   DocumentGenerationResult,
   GeneratedDocument,
   PullRequestData,
-} from "../models/index.js";
+} from "../domain/types.js";
 import { extractClaims } from "./claim-extractor.js";
 import type { DocumentStore } from "./document-store.js";
 import {

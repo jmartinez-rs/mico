@@ -1,6 +1,6 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
-import type { GeneratedDocument } from "../models/index.js";
+import type { GeneratedDocument } from "../domain/types.js";
 
 /**
  * Índice persistente de documentos generados. Se guarda como JSON junto a la

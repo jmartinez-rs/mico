@@ -30,10 +30,6 @@ Instead of relying on someone to manually write documentation for every mileston
 
 </div>
 
-### In a nutshell
-
-> **Git stores what changed. Mico preserves what it means.**
-
 ---
 
 ## 🚀 Quick Start (Under 2 Minutes)

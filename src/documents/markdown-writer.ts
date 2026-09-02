@@ -7,7 +7,7 @@ import type {
   Evidence,
   WorkEventDocumentView,
 } from "../domain/work-event.js";
-import type { PullRequestData } from "../models/index.js";
+import type { PullRequestData } from "../domain/types.js";
 
 export function slugify(value: string): string {
   return value

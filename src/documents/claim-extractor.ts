@@ -6,7 +6,7 @@ import {
   parseClaimsResponse,
   type ClaimsResponse,
 } from "../llm/claims-prompt.js";
-import type { PullRequestData } from "../models/index.js";
+import type { PullRequestData } from "../domain/types.js";
 
 export interface ExtractClaimsInput {
   llm: LLMProvider;

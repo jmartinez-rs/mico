@@ -1,4 +1,4 @@
-import type { PullRequestData } from "../models/index.js";
+import type { PullRequestData } from "../domain/types.js";
 
 const MAX_PATCH_CHARS = 6000;
 const MAX_TOTAL_PATCH_CHARS = 40000;

@@ -5,9 +5,6 @@ import path from "path";
 import { pathToFileURL } from "url";
 import { loadConfig } from "./config.js";
 import { MicoAgent } from "./agent/agent.js";
-import { DocumentService } from "./documents/document-service.js";
-import { DocumentStore } from "./documents/document-store.js";
-import { DigestService } from "./documents/digest-service.js";
 import { GitHubClient } from "./github/github-client.js";
 import { OpenAICompatibleProvider } from "./llm/openai-provider.js";
 import { WorkEventStore } from "./memory/work-event-store.js";
@@ -234,89 +231,8 @@ async function runStart(): Promise<void> {
   }
 }
 
-/** Genera documentación desde un PR de GitHub: `mico document <owner/repo> <pr>`. */
-async function runDocument(): Promise<void> {
-  const args = process.argv.slice(2);
-  const repo = args[1];
-  const prNumber = parseInt(args[2] ?? "", 10);
-
-  if (!repo || !Number.isInteger(prNumber) || prNumber <= 0) {
-    console.error("\n ✗ Uso: mico document <owner/repo> <pr-number>\n");
-    process.exit(1);
-  }
-
-  try {
-    const config = loadConfig(process.env, process.cwd());
-    if (!config.githubToken) {
-      console.error("\n ✗ Se requiere GITHUB_TOKEN en .env o mico.config.json para documentar PRs.\n");
-      process.exit(1);
-    }
-
-    const github = new GitHubClient(config.githubToken);
-    const llm = new OpenAICompatibleProvider(config.llm);
-    const store = new DocumentStore(config.documentsPath);
-    const memory = new WorkEventStore(config.workEventsPath);
-    const service = new DocumentService(github, llm, store, config.documentsPath, memory, {
-      confidence: config.confidence,
-    });
-
-    console.log(`\n 🐒 Documentando PR #${prNumber} de ${repo}...\n`);
-    const result = await service.generateFromPullRequest({
-      repository: repo,
-      pullRequestNumber: prNumber,
-    });
-
-    console.log(`  ✓ Documento generado: ${result.filePath}`);
-    console.log(`  ✓ Confianza: ${result.confidence.level} (score ${result.confidence.score})`);
-    if (result.needsHumanReview) {
-      console.log("  ⚠ Marcado para revisión humana.");
-    }
-    console.log("");
-  } catch (error: any) {
-    console.error(`\n ✗ Error al documentar el PR: ${error.message}\n`);
-    process.exit(1);
-  }
-}
-
-/** Genera el digest semanal desde la memoria local: `mico digest [--repo] [--from] [--to]`. */
-async function runDigest(): Promise<void> {
-  const args = process.argv.slice(2);
-  const repoFlag = args.indexOf("--repo");
-  const fromFlag = args.indexOf("--from");
-  const toFlag = args.indexOf("--to");
-
-  const repository = repoFlag >= 0 ? args[repoFlag + 1] : undefined;
-  const from = fromFlag >= 0 ? args[fromFlag + 1] : undefined;
-  const to = toFlag >= 0 ? args[toFlag + 1] : undefined;
-
-  if (!repository) {
-    console.error("\n ✗ Uso: mico digest --repo <owner/repo> [--from YYYY-MM-DD] [--to YYYY-MM-DD]\n");
-    process.exit(1);
-  }
-
-  try {
-    const config = loadConfig(process.env, process.cwd());
-    const llm = new OpenAICompatibleProvider(config.llm);
-    const memory = new WorkEventStore(config.workEventsPath);
-    const service = new DigestService(memory, llm, config.documentsPath, {
-      confidence: config.confidence,
-    });
-
-    console.log(`\n 🐒 Generando digest semanal de ${repository}...\n`);
-    const result = await service.generateWeekly({ repository, from, to });
-
-    console.log(`  ✓ Digest generado: ${result.filePath}`);
-    console.log(`  ✓ Semana: ${result.weekLabel} (${result.eventCount} evento(s))`);
-    console.log(`  ✓ Confianza: ${result.confidence.level} (score ${result.confidence.score})`);
-    if (result.needsHumanReview) {
-      console.log("  ⚠ Marcado para revisión humana.");
-    }
-    console.log("");
-  } catch (error: any) {
-    console.error(`\n ✗ Error al generar el digest: ${error.message}\n`);
-    process.exit(1);
-  }
-}
+import { runDocument } from "./cli/commands/document.js";
+import { runDigest } from "./cli/commands/digest.js";
 
 async function main(): Promise<void> {
   const args = process.argv.slice(2);

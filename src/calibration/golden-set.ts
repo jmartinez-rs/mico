@@ -1,5 +1,5 @@
 import type { ConfidenceLevel } from "../domain/work-event.js";
-import type { PullRequestData } from "../models/index.js";
+import type { PullRequestData } from "../domain/types.js";
 
 /**
  * Caso del golden-set de calibración: un PR de fixture con el nivel de confianza

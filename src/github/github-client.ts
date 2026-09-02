@@ -4,7 +4,7 @@ import type {
   PullRequestData,
   PullRequestFile,
   PullRequestReview,
-} from "../models/index.js";
+} from "../domain/types.js";
 
 export class GitHubError extends Error {
   constructor(

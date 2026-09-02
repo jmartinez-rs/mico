@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { GitHubClient } from "../github/github-client.js";
 import type { LLMProvider } from "../llm/provider.js";
-import type { PullRequestData } from "../models/index.js";
+import type { PullRequestData } from "../domain/types.js";
 import { DocumentStore } from "./document-store.js";
 import { WorkEventStore } from "../memory/work-event-store.js";
 import { DocumentService } from "./document-service.js";
