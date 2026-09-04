@@ -21,7 +21,7 @@ import {
   stopDaemon,
 } from "./cli/daemon-manager.js";
 
-const VERSION = "0.1.1";
+const VERSION = "0.1.2";
 
 const HELP_TEXT = `
 🐒 MICO AGENT v${VERSION} — El agente curioso de monitoreo de commits
