@@ -73,6 +73,19 @@ export async function runInit(cwd: string = process.cwd()): Promise<void> {
     console.log(`  ✓ Carpeta existente: ${docsPath}`);
   }
 
+  const gitignorePath = path.join(cwd, ".gitignore");
+  if (fs.existsSync(path.join(cwd, ".git"))) {
+    const relativeDocs = path.relative(cwd, docsPath);
+    if (!relativeDocs.startsWith("..") && !path.isAbsolute(relativeDocs)) {
+      const gitignoreContent = fs.existsSync(gitignorePath) ? fs.readFileSync(gitignorePath, "utf-8") : "";
+      const ignoreEntry = `\n# Mico reports\n/${relativeDocs}/\n`;
+      if (!gitignoreContent.includes(`/${relativeDocs}/`) && !gitignoreContent.includes(`${relativeDocs}/`)) {
+        fs.appendFileSync(gitignorePath, ignoreEntry, "utf-8");
+        console.log(`  ✓ Carpeta de informes agregada a .gitignore`);
+      }
+    }
+  }
+
   // 2. Crear mico.config.json
   if (!fs.existsSync(configPath)) {
     const defaultConfig = defaultConfigTemplate();
@@ -115,6 +128,19 @@ export async function runConfig(cwd: string = process.cwd()): Promise<void> {
   const docsPath = path.resolve(cwd, answers.outputDir);
   fs.mkdirSync(docsPath, { recursive: true });
   console.log(`  ✓ Carpeta de informes: ${docsPath}`);
+
+  const gitignorePath = path.join(cwd, ".gitignore");
+  if (fs.existsSync(path.join(cwd, ".git"))) {
+    const relativeDocs = path.relative(cwd, docsPath);
+    if (!relativeDocs.startsWith("..") && !path.isAbsolute(relativeDocs)) {
+      const gitignoreContent = fs.existsSync(gitignorePath) ? fs.readFileSync(gitignorePath, "utf-8") : "";
+      const ignoreEntry = `\n# Mico reports\n/${relativeDocs}/\n`;
+      if (!gitignoreContent.includes(`/${relativeDocs}/`) && !gitignoreContent.includes(`${relativeDocs}/`)) {
+        fs.appendFileSync(gitignorePath, ignoreEntry, "utf-8");
+        console.log(`  ✓ Carpeta de informes agregada a .gitignore`);
+      }
+    }
+  }
 
   if (answers.installHook) {
     try {
