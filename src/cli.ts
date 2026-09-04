@@ -170,6 +170,7 @@ export async function runConfig(cwd: string = process.cwd()): Promise<void> {
    • 'npx mico hook'       → install | uninstall (post-commit).
  =======================================================
 `);
+  process.exit(0);
 }
 
 /** Ejecuta una única pasada de verificación (para run-once y el git hook). */
