@@ -30,6 +30,7 @@ export interface GenerateFromPullRequestInput {
 
 export interface DocumentServiceOptions {
   confidence?: ConfidenceConfig;
+  language?: "es" | "en";
 }
 
 export class DocumentService {
@@ -41,7 +42,7 @@ export class DocumentService {
     private readonly store: DocumentStore,
     private readonly documentsPath: string,
     private readonly memory: WorkEventStore,
-    options: DocumentServiceOptions = {},
+    private readonly options: DocumentServiceOptions = {},
   ) {
     this.confidenceConfig = options.confidence ?? DEFAULT_CONFIDENCE_CONFIG;
   }
@@ -72,6 +73,7 @@ export class DocumentService {
       workEventId: workEvent.id,
       evidence,
       confidence,
+      language: this.options.language,
     });
 
     const view: WorkEventDocumentView = {
@@ -83,7 +85,7 @@ export class DocumentService {
       narrative,
     };
 
-    const markdown = renderWorkEventDocument(view);
+    const markdown = renderWorkEventDocument(view, this.options.language);
     const filePath = buildDocumentPath(this.documentsPath, pr);
     await writeDocument(filePath, markdown);
 

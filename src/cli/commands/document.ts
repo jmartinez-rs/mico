@@ -29,6 +29,7 @@ export async function runDocument(): Promise<void> {
     const memory = new WorkEventStore(config.workEventsPath);
     const service = new DocumentService(github, llm, store, config.documentsPath, memory, {
       confidence: config.confidence,
+      language: config.mico.language as "es" | "en",
     });
 
     console.log(`\n 🐒 Documentando PR #${prNumber} de ${repo}...\n`);

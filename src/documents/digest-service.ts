@@ -3,7 +3,7 @@ import {
   type ConfidenceConfig,
 } from "../domain/confidence.js";
 import type { Confidence } from "../domain/work-event.js";
-import { DIGEST_SYSTEM_PROMPT, buildDigestPrompt } from "../llm/digest-prompt.js";
+import { buildDigestSystemPrompt, buildDigestPrompt } from "../llm/digest-prompt.js";
 import type { LLMProvider } from "../llm/provider.js";
 import type { WorkEventStore } from "../memory/work-event-store.js";
 import {
@@ -36,6 +36,7 @@ export interface WeeklyDigestResult {
 
 export interface DigestServiceOptions {
   confidence?: ConfidenceConfig;
+  language?: "es" | "en";
 }
 
 /**
@@ -51,7 +52,7 @@ export class DigestService {
     private readonly memory: WorkEventStore,
     private readonly llm: LLMProvider,
     private readonly documentsPath: string,
-    options: DigestServiceOptions = {},
+    private readonly options: DigestServiceOptions = {},
   ) {
     this.confidenceConfig = options.confidence ?? DEFAULT_CONFIDENCE_CONFIG;
   }
@@ -85,7 +86,7 @@ export class DigestService {
       confidenceConfig: this.confidenceConfig,
     });
 
-    const markdown = renderWeeklyDigest(view);
+    const markdown = renderWeeklyDigest(view, this.options.language);
     const filePath = buildDigestPath(this.documentsPath, input.repository, weekLabel);
     await writeDocument(filePath, markdown);
 
@@ -112,8 +113,8 @@ export class DigestService {
     }
     try {
       return await this.llm.generate({
-        system: DIGEST_SYSTEM_PROMPT,
-        prompt: buildDigestPrompt(repository, events),
+        system: buildDigestSystemPrompt(this.options.language),
+        prompt: buildDigestPrompt(repository, events, this.options.language),
       });
     } catch {
       // Degradación segura: si el LLM falla, el view compone un overview

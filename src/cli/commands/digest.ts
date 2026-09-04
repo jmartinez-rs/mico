@@ -25,6 +25,7 @@ export async function runDigest(): Promise<void> {
     const memory = new WorkEventStore(config.workEventsPath);
     const service = new DigestService(memory, llm, config.documentsPath, {
       confidence: config.confidence,
+      language: config.mico.language as "es" | "en",
     });
 
     console.log(`\n 🐒 Generando digest semanal de ${repository}...\n`);

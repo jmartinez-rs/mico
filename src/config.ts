@@ -14,6 +14,7 @@ const configSchema = z.object({
   documentsPath: z.string().min(1).default("./data/docs"),
   workEventsPath: z.string().min(1).default("./data/work-events"),
   mico: z.object({
+    language: z.enum(["es", "en"]).default("es"),
     watchIntervalMs: z.coerce.number().int().positive().default(10000),
     targetRepoPath: z.string().min(1).default("./"),
     outputDir: z.string().min(1).default("./docs/mico").transform(val => {
@@ -71,6 +72,7 @@ export function loadConfig(
     documentsPath: env.DOCUMENTS_PATH ?? fileConfig.documentsPath,
     workEventsPath: env.WORK_EVENTS_PATH ?? fileConfig.workEventsPath,
     mico: {
+      language: env.MICO_LANGUAGE ?? fileConfig.language ?? fileConfig.mico?.language,
       watchIntervalMs: env.MICO_WATCH_INTERVAL_MS ?? fileConfig.watchIntervalMs ?? fileConfig.mico?.watchIntervalMs,
       targetRepoPath: env.MICO_TARGET_REPO_PATH ?? fileConfig.targetRepoPath ?? fileConfig.mico?.targetRepoPath,
       outputDir: env.MICO_OUTPUT_DIR ?? fileConfig.outputDir ?? fileConfig.mico?.outputDir,

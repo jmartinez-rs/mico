@@ -1,7 +1,7 @@
 import type { Claim, Confidence, Evidence } from "../domain/work-event.js";
 import type { LLMProvider } from "../llm/provider.js";
 import {
-  CLAIMS_SYSTEM_PROMPT,
+  buildClaimsSystemPrompt,
   buildClaimsPrompt,
   parseClaimsResponse,
   type ClaimsResponse,
@@ -14,6 +14,7 @@ export interface ExtractClaimsInput {
   workEventId: string;
   evidence: Evidence[];
   confidence: Confidence;
+  language?: "es" | "en";
 }
 
 export interface ExtractedClaims {
@@ -32,11 +33,11 @@ export interface ExtractedClaims {
 export async function extractClaims(
   input: ExtractClaimsInput,
 ): Promise<ExtractedClaims> {
-  const { llm, pr, workEventId, evidence, confidence } = input;
+  const { llm, pr, workEventId, evidence, confidence, language = "es" } = input;
   const evidenceIds = evidence.map((item) => item.id);
 
   const raw = await llm.generate({
-    system: CLAIMS_SYSTEM_PROMPT,
+    system: buildClaimsSystemPrompt(language),
     prompt: buildClaimsPrompt(pr),
   });
 
