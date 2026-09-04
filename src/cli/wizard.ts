@@ -43,7 +43,7 @@ export interface Questioner {
     choices: { value: T; label: string }[],
     defaultValue?: T,
   ): Promise<T>;
-  ask(question: string, defaultValue?: string): Promise<string>;
+  ask(question: string, defaultValue?: string, isSecret?: boolean): Promise<string>;
   confirm(question: string, defaultYes?: boolean): Promise<boolean>;
 }
 
@@ -68,8 +68,9 @@ export function createReadlineQuestioner(): Questioner {
       return (fallback ?? choices[0]!).value;
     },
 
-    async ask(question, defaultValue) {
-      const suffix = defaultValue ? ` [${defaultValue}]` : "";
+    async ask(question, defaultValue, isSecret = false) {
+      const displayDefault = isSecret && defaultValue ? "***" : defaultValue;
+      const suffix = defaultValue ? ` [${displayDefault}]` : "";
       const answer = await rl.question(`${question}${suffix}: `);
       return answer.trim() || defaultValue || "";
     },
@@ -113,7 +114,7 @@ export async function runWizard(
   }
 
   const envDefault = env.LLM_API_KEY || env.OPENAI_API_KEY || "";
-  const apiKey = await questioner.ask("API Key", envDefault || undefined);
+  const apiKey = await questioner.ask("API Key", envDefault || undefined, true);
 
   const targetRepoPath = await questioner.ask(
     "Repositorio a monitorear (ruta local)",

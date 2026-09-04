@@ -72,10 +72,18 @@ export async function startDaemon(
   const paths = daemonPaths(options);
   fs.mkdirSync(path.dirname(paths.pidFile), { recursive: true });
 
-  const entry = options.entry ?? path.join(options.cwd, "dist", "cli.js");
+  let entry = options.entry;
+  if (!entry) {
+    if (process.argv[1]) {
+      entry = fs.realpathSync(process.argv[1]);
+    } else {
+      entry = path.join(options.cwd, "dist", "cli.js");
+    }
+  }
+
   if (!fs.existsSync(entry)) {
     throw new Error(
-      `No se encontró el entry point "${entry}". Ejecutá antes \`npm run build\`.`,
+      `No se encontró el entry point "${entry}". Verificá la instalación o ejecutá \`npm run build\`.`,
     );
   }
 

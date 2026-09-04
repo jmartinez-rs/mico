@@ -112,7 +112,7 @@ export async function runConfig(cwd: string = process.cwd()): Promise<void> {
     console.log(`  ✓ Configuración guardada en ${configPath}`);
   }
 
-  const docsPath = path.join(cwd, answers.outputDir);
+  const docsPath = path.resolve(cwd, answers.outputDir);
   fs.mkdirSync(docsPath, { recursive: true });
   console.log(`  ✓ Carpeta de informes: ${docsPath}`);
 
