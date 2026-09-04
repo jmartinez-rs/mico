@@ -1,6 +1,6 @@
 {
   "name": "mico-agent",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Mico 🐒 - Agente curioso que monitorea commits de Git en tiempo real y documenta las tareas diarias en Markdown.",
   "type": "module",
   "license": "MIT",
