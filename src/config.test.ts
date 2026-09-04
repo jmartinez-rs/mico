@@ -41,7 +41,7 @@ describe("loadConfig", () => {
     const config = loadConfig({} as NodeJS.ProcessEnv, tempDir);
     expect(config.llm.apiKey).toBe("key_desde_json");
     expect(config.llm.model).toBe("model_desde_json");
-    expect(config.mico.outputDir).toBe("./docs/json-custom");
+    expect(config.mico.outputDir).toBe("docs/json-custom/mico");
 
     await fs.rm(tempDir, { recursive: true, force: true });
   });

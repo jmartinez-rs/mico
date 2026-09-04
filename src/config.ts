@@ -1,5 +1,6 @@
 import { config as loadEnv } from "dotenv";
 import { z } from "zod";
+import path from "path";
 
 loadEnv();
 
@@ -15,7 +16,12 @@ const configSchema = z.object({
   mico: z.object({
     watchIntervalMs: z.coerce.number().int().positive().default(10000),
     targetRepoPath: z.string().min(1).default("./"),
-    outputDir: z.string().min(1).default("./docs/mico"),
+    outputDir: z.string().min(1).default("./docs/mico").transform(val => {
+      if (path.basename(val).toLowerCase() !== "mico") {
+        return path.join(val, "mico");
+      }
+      return val;
+    }),
     stateFile: z.string().min(1).default("./data/mico-state.json"),
   }),
   confidence: z.object({
@@ -38,7 +44,6 @@ export type AppConfig = z.infer<typeof configSchema>;
 export type MicoConfig = AppConfig["mico"];
 
 import fs from "fs";
-import path from "path";
 
 export function loadConfig(
   env: NodeJS.ProcessEnv = process.env,
