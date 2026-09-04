@@ -8,19 +8,38 @@ import { buildPrompt } from "./prompt.js";
  * decisiones y pendientes. Mantiene la regla de no inventar: si algo no surge de
  * la evidencia, no se afirma.
  */
-export const CLAIMS_SYSTEM_PROMPT = [
-  "Eres un asistente técnico que analiza Pull Requests y extrae afirmaciones (claims) verificables.",
-  "Respondes ÚNICAMENTE con un objeto JSON válido, sin texto adicional ni bloques de código.",
-  "El JSON tiene esta forma exacta:",
-  '{ "overview": string, "did": string[], "decisions": string[], "pending": string[] }',
-  "- overview: un párrafo breve (2-4 frases) que resume el trabajo del PR en español.",
-  "- did: qué se hizo (cambios concretos), una frase por ítem.",
-  "- decisions: decisiones técnicas o de diseño tomadas, una por ítem.",
-  "- pending: qué quedó sin terminar o por avanzar (TODOs, seguimiento), una por ítem.",
-  "Nunca inventes: básate solo en la evidencia (descripción, commits, diffs, reviews).",
-  "Si una categoría no tiene contenido respaldado por evidencia, devuelve un arreglo vacío.",
-  "Escribe en español, tono profesional y conciso.",
-].join(" ");
+export function buildClaimsSystemPrompt(language: "es" | "en" = "es"): string {
+  const isEn = language === "en";
+  if (isEn) {
+    return [
+      "You are a technical assistant that analyzes Pull Requests and extracts verifiable claims.",
+      "Respond ONLY with a valid JSON object, without markdown code blocks or extra text.",
+      "The JSON must have this exact shape:",
+      '{ "overview": string, "did": string[], "decisions": string[], "pending": string[] }',
+      "- overview: a brief paragraph (2-4 sentences) summarizing the work of the PR.",
+      "- did: what was done (concrete changes), one sentence per item.",
+      "- decisions: technical or design decisions made, one per item.",
+      "- pending: what was left unfinished or needs follow-up (TODOs), one per item.",
+      "Never make things up: rely solely on evidence (description, commits, diffs, reviews).",
+      "If a category lacks evidence-backed content, return an empty array.",
+      "Write in English, in a professional and concise tone."
+    ].join(" ");
+  }
+
+  return [
+    "Eres un asistente técnico que analiza Pull Requests y extrae afirmaciones (claims) verificables.",
+    "Respondes ÚNICAMENTE con un objeto JSON válido, sin texto adicional ni bloques de código.",
+    "El JSON tiene esta forma exacta:",
+    '{ "overview": string, "did": string[], "decisions": string[], "pending": string[] }',
+    "- overview: un párrafo breve (2-4 frases) que resume el trabajo del PR.",
+    "- did: qué se hizo (cambios concretos), una frase por ítem.",
+    "- decisions: decisiones técnicas o de diseño tomadas, una por ítem.",
+    "- pending: qué quedó sin terminar o por avanzar (TODOs, seguimiento), una por ítem.",
+    "Nunca inventes: básate solo en la evidencia (descripción, commits, diffs, reviews).",
+    "Si una categoría no tiene contenido respaldado por evidencia, devuelve un arreglo vacío.",
+    "Escribe en español, tono profesional y conciso.",
+  ].join(" ");
+}
 
 /**
  * Construye el prompt de extracción de claims reutilizando el detalle del PR ya

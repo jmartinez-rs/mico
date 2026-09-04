@@ -114,10 +114,16 @@ export class MicoAgent {
           console.log(`[Mico] 🔍 Analizando commit ${commit.shortHash}: "${commit.message.split("\n")[0]}"`);
 
           // Analizar con LLM
-          const analysis = await this.commitAnalyzer.analyzeCommit(commit);
+          const analysis = await this.commitAnalyzer.analyzeCommit(
+            commit,
+            this.config.mico.language as "es" | "en"
+          );
 
           // Escribir en documento diario Markdown
-          const docPath = await this.dailyDocManager.appendCommitAnalysis(analysis);
+          const docPath = await this.dailyDocManager.appendCommitAnalysis(
+            analysis,
+            this.config.mico.language as "es" | "en"
+          );
           console.log(`[Mico] 📝 Documentado en ${docPath}`);
 
           // Persistir en la memoria de work-events (unifica daemon ↔ digests)

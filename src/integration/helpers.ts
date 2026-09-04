@@ -93,6 +93,7 @@ export function makeIntegrationConfig(overrides: {
     documentsPath: join(overrides.dataDir, "docs"),
     workEventsPath: join(overrides.dataDir, "work-events"),
     mico: {
+      language: "es",
       watchIntervalMs: 10000,
       targetRepoPath: overrides.repoDir,
       outputDir: join(overrides.dataDir, "docs", "mico"),

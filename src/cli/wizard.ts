@@ -32,6 +32,7 @@ export interface WizardAnswers {
   apiKey: string;
   targetRepoPath: string;
   outputDir: string;
+  language: "es" | "en";
   installHook: boolean;
   startDaemon: boolean;
 }
@@ -127,6 +128,14 @@ export async function runWizard(
   if (path.basename(outputDir).toLowerCase() !== "mico") {
     outputDir = path.join(outputDir, "mico");
   }
+  const language = await questioner.select<"es" | "en">(
+    "Idioma de los informes (Language for reports)",
+    [
+      { value: "es", label: "Español" },
+      { value: "en", label: "English" },
+    ],
+    "es",
+  );
 
   const installHook = await questioner.confirm(
     "¿Instalar hook de git post-commit para documentar en cada commit?",
@@ -144,6 +153,7 @@ export async function runWizard(
     apiKey,
     targetRepoPath,
     outputDir,
+    language,
     installHook,
     startDaemon,
   };
@@ -161,6 +171,7 @@ export function defaultConfigTemplate(): Record<string, any> {
     documentsPath: "./data/docs",
     workEventsPath: "./data/work-events",
     mico: {
+      language: "es",
       watchIntervalMs: 10000,
       targetRepoPath: "./",
       outputDir: "./docs/mico",
@@ -204,6 +215,7 @@ export function writeConfigFile(
   };
   config.mico.targetRepoPath = answers.targetRepoPath;
   config.mico.outputDir = answers.outputDir;
+  config.mico.language = answers.language;
 
   fs.writeFileSync(configPath, JSON.stringify(config, null, 2), "utf-8");
   return configPath;
