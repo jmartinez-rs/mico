@@ -120,10 +120,13 @@ export async function runWizard(
     "Repositorio a monitorear (ruta local)",
     "./",
   );
-  const outputDir = await questioner.ask(
+  let outputDir = await questioner.ask(
     "Directorio de salida de informes",
     "./docs/mico",
   );
+  if (path.basename(outputDir).toLowerCase() !== "mico") {
+    outputDir = path.join(outputDir, "mico");
+  }
 
   const installHook = await questioner.confirm(
     "¿Instalar hook de git post-commit para documentar en cada commit?",
