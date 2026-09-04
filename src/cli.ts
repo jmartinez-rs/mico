@@ -21,7 +21,7 @@ import {
   stopDaemon,
 } from "./cli/daemon-manager.js";
 
-const VERSION = "0.1.2";
+const VERSION = "0.1.3";
 
 const HELP_TEXT = `
 🐒 MICO AGENT v${VERSION} — El agente curioso de monitoreo de commits
@@ -170,6 +170,7 @@ export async function runConfig(cwd: string = process.cwd()): Promise<void> {
    • 'npx mico hook'       → install | uninstall (post-commit).
  =======================================================
 `);
+  process.exit(0);
 }
 
 /** Ejecuta una única pasada de verificación (para run-once y el git hook). */
