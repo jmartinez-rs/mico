@@ -73,7 +73,8 @@ export class GitWatcher {
 
     const dateObj = new Date(dateStr);
     const dateIso = dateObj.toISOString();
-    const dateYYYYMMDD = dateIso.split("T")[0] ?? "1970-01-01";
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    const dateYYYYMMDD = `${dateObj.getFullYear()}-${pad(dateObj.getMonth() + 1)}-${pad(dateObj.getDate())}`;
 
     // Obtener lista de archivos modificados
     const filesOutput = await this.runGit(["show", "--stat", "--name-only", `--format=`, hash]);
